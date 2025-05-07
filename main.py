@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.exceptions import RequestValidationError
 from app.core.config import settings
 from app.api.api_v1.api import api_router
+from app.core.middleware import validation_exception_handler
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -17,6 +19,9 @@ if settings.BACKEND_CORS_ORIGINS:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+# Register exception handlers
+app.add_exception_handler(RequestValidationError, validation_exception_handler)
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
