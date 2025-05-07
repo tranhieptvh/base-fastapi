@@ -1,5 +1,5 @@
 build:
-	docker compose build --no-cache
+	docker compose build
 
 up:
 	sudo service apache2 stop

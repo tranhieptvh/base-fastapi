@@ -1,15 +1,16 @@
 from typing import Optional
 from pydantic import BaseModel, EmailStr, Field, validator
 from datetime import datetime
-from app.db.session import SessionLocal
+from app.dependencies.db import SessionLocal
 from app.db.models import User as UserModel
 
 class UserBase(BaseModel):
     email: EmailStr
-    username: str
+    username: str = Field(..., min_length=3, max_length=50)
+    full_name: Optional[str] = None
 
 class UserCreate(UserBase):
-    password: str = Field(..., min_length=6, description="Password must be at least 6 characters long")
+    password: str = Field(..., min_length=6)
 
     @validator('email')
     def email_must_be_unique(cls, v):
@@ -33,9 +34,9 @@ class UserCreate(UserBase):
 
 class UserUpdate(BaseModel):
     email: Optional[EmailStr] = None
-    username: Optional[str] = None
-    password: Optional[str] = Field(None, min_length=6, description="Password must be at least 6 characters long")
-    is_active: Optional[bool] = None
+    username: Optional[str] = Field(None, min_length=3, max_length=50)
+    full_name: Optional[str] = None
+    password: Optional[str] = Field(None, min_length=6)
 
     @validator('email')
     def email_must_be_unique(cls, v):
@@ -70,8 +71,22 @@ class UserInDBBase(UserBase):
     class Config:
         from_attributes = True
 
+class UserResponse(UserInDBBase):
+    pass
+
 class User(UserInDBBase):
     pass
 
 class UserInDB(UserInDBBase):
-    password: str 
+    password: str
+
+class PasswordReset(BaseModel):
+    email: EmailStr
+
+class PasswordUpdate(BaseModel):
+    current_password: str
+    new_password: str = Field(..., min_length=6)
+
+class PasswordResetConfirm(BaseModel):
+    token: str
+    new_password: str = Field(..., min_length=6) 

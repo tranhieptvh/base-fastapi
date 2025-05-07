@@ -7,18 +7,19 @@ This is a modern FastAPI project with a well-organized structure.
 ```
 .
 ├── alembic/              # Database migrations
-├── app/
+├── app/                  # Application source code
 │   ├── api/             # API endpoints
 │   ├── core/            # Core functionality
 │   ├── db/              # Database models and session
+│   ├── dependencies/    # Application dependencies
 │   ├── schemas/         # Pydantic models
-│   └── services/        # Business logic
+│   ├── services/        # Business logic
+│   └── docs/           # Project documentation
 ├── tests/               # Test files
 ├── .env                 # Environment variables
 ├── .env.example         # Example environment variables
 ├── alembic.ini          # Alembic configuration
-├── main.py             # Application entry point
-├── requirements.txt     # Project dependencies
+├── pyproject.toml       # Poetry configuration
 ├── Dockerfile          # Docker configuration
 └── docker-compose.yml  # Docker Compose configuration
 ```
@@ -55,7 +56,7 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 2. Install dependencies:
 ```bash
-pip install -r requirements.txt
+poetry install
 ```
 
 3. Copy `.env.example` to `.env` and update the variables:
@@ -65,14 +66,14 @@ cp .env.example .env
 
 4. Run the application:
 ```bash
-uvicorn main:app --reload
+poetry run uvicorn app.main:app --reload
 ```
 
 ## Development
 
 - API documentation will be available at `/docs`
 - Alternative API documentation at `/redoc`
-- Run tests with: `pytest`
+- Run tests with: `poetry run pytest`
 
 ## Docker Commands
 

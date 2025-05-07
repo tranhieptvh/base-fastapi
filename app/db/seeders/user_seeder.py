@@ -1,4 +1,4 @@
-from app.services.user import get_password_hash
+from app.core.security import get_password_hash
 from app.db.models.user import User
 from app.db.models.role import Role
 from app.db.seeders.base import BaseSeeder
