@@ -9,8 +9,8 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+def verify_password(plain_password: str, password: str) -> bool:
+    return pwd_context.verify(plain_password, password)
 
 def get_user(db: Session, user_id: int) -> Optional[User]:
     return db.query(User).filter(User.id == user_id).first()
@@ -25,11 +25,11 @@ def get_users(db: Session, skip: int = 0, limit: int = 100) -> List[User]:
     return db.query(User).offset(skip).limit(limit).all()
 
 def create_user(db: Session, user: UserCreate) -> User:
-    hashed_password = get_password_hash(user.password)
+    password = get_password_hash(user.password)
     db_user = User(
         email=user.email,
         username=user.username,
-        hashed_password=hashed_password
+        password=password
     )
     db.add(db_user)
     db.commit()
@@ -43,7 +43,7 @@ def update_user(db: Session, user_id: int, user: UserUpdate) -> Optional[User]:
     
     update_data = user.model_dump(exclude_unset=True)
     if "password" in update_data:
-        update_data["hashed_password"] = get_password_hash(update_data.pop("password"))
+        update_data["password"] = get_password_hash(update_data.pop("password"))
     
     for field, value in update_data.items():
         setattr(db_user, field, value)

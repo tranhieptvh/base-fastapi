@@ -74,4 +74,4 @@ class User(UserInDBBase):
     pass
 
 class UserInDB(UserInDBBase):
-    hashed_password: str 
+    password: str 

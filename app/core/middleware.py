@@ -1,8 +1,6 @@
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
-from pydantic import ValidationError
-from app.core.exceptions import ValidationException
 
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     details = []
