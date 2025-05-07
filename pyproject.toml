@@ -1,0 +1,51 @@
+[tool.poetry]
+name = "base-fastapi"
+version = "0.1.0"
+description = "Base FastAPI project with SQLAlchemy, Alembic, and JWT authentication"
+authors = ["Your Name <your.email@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.109.2"
+uvicorn = "^0.27.1"
+sqlalchemy = "^2.0.27"
+pymysql = "^1.1.0"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+bcrypt = "^4.1.2"
+alembic = "^1.13.1"
+pydantic = "^2.6.1"
+pydantic-settings = "^2.1.0"
+python-dotenv = "^1.0.1"
+email-validator = "^2.1.0.post1"
+python-multipart = "^0.0.9"
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.1.1"
+isort = "^5.13.2"
+flake8 = "^7.0.0"
+mypy = "^1.8.0"
+pytest = "^8.0.0"
+httpx = "^0.26.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+target-version = ['py312']
+include = '\.pyi?$'
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true 
