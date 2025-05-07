@@ -40,8 +40,8 @@ def register_user(
     user = user_service.create_user(db, obj_in=user_in)
     return success_response(data=user, message="User registered successfully")
 
-@router.post("/login", response_model=ResponseModel[Token])
-def login_access_token(
+@router.post("/login", response_model=Token)
+def login(
     *,
     db: Session = Depends(get_db),
     email: str = Body(...),
@@ -54,18 +54,32 @@ def login_access_token(
         db, email=email, password=password
     )
     if not user:
-        raise HTTPException(status_code=400, detail="Incorrect email or password")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     elif not user.is_active:
-        raise HTTPException(status_code=400, detail="Inactive user")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user"
+        )
+        
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    return success_response(
-        data={
-            "access_token": security.create_access_token(
-                user.id, expires_delta=access_token_expires
-            ),
-            "token_type": "bearer",
-        }
+    access_token = security.create_access_token(
+        subject=user.id, expires_delta=access_token_expires
     )
+    
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "username": user.username,
+            "full_name": user.full_name,
+            "is_active": user.is_active
+        }
+    }
 
 @router.post("/password-reset", response_model=ResponseModel)
 def request_password_reset(
@@ -126,4 +140,5 @@ def logout(
     Logout user.
     """
     # TODO: Implement token blacklist
+    print(f"Logout user: {current_user}")
     return success_response(message="Successfully logged out") 
