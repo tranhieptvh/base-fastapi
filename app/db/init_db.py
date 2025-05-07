@@ -1,4 +1,4 @@
-from app.db.session import SessionLocal
+from app.dependencies.db import SessionLocal
 from app.db.seeders.database_seeder import DatabaseSeeder
 
 def init_db():
