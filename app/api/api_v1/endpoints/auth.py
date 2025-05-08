@@ -18,11 +18,11 @@ from app.schemas.user import (
     PasswordResetConfirm,
 )
 from app.services import user as user_service
-from app.core.response import ResponseModel, success_response
+from app.core.response import SuccessResponse, ErrorResponse
 
 router = APIRouter()
 
-@router.post("/register", response_model=ResponseModel[UserSchema])
+@router.post("/register", response_model=SuccessResponse[UserSchema])
 def register_user(
     *,
     db: Session = Depends(get_db),
@@ -35,10 +35,10 @@ def register_user(
     if user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="The user with this email already exists in the system.",
+            detail=ErrorResponse(error={"message": "The user with this email already exists in the system."}).dict()
         )
     user = user_service.create_user(db, obj_in=user_in)
-    return success_response(data=user, message="User registered successfully")
+    return SuccessResponse(data=user, message="User registered successfully")
 
 @router.post("/login", response_model=Token)
 def login(
@@ -56,12 +56,13 @@ def login(
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
+            detail=ErrorResponse(error={"message": "Incorrect email or password"}).dict(),
             headers={"WWW-Authenticate": "Bearer"},
         )
     elif not user.is_active:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=ErrorResponse(error={"message": "Inactive user"}).dict()
         )
         
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -77,11 +78,15 @@ def login(
             "email": user.email,
             "username": user.username,
             "full_name": user.full_name,
-            "is_active": user.is_active
+            "is_active": user.is_active,
+            "role": {
+                "id": user.role.id,
+                "name": user.role.name
+            } if user.role else None
         }
     }
 
-@router.post("/password-reset", response_model=ResponseModel)
+@router.post("/password-reset", response_model=SuccessResponse)
 def request_password_reset(
     *,
     db: Session = Depends(get_db),
@@ -94,10 +99,10 @@ def request_password_reset(
     if user:
         token = user_service.create_password_reset_token(email)
         # TODO: Send email with token
-        return success_response(message="Password reset email sent")
-    return success_response(message="If the email exists, a password reset email has been sent")
+        return SuccessResponse(message="Password reset email sent")
+    return SuccessResponse(message="If the email exists, a password reset email has been sent")
 
-@router.post("/password-reset/confirm", response_model=ResponseModel)
+@router.post("/password-reset/confirm", response_model=SuccessResponse)
 def reset_password(
     *,
     db: Session = Depends(get_db),
@@ -109,14 +114,20 @@ def reset_password(
     """
     email = user_service.verify_password_reset_token(token)
     if not email:
-        raise HTTPException(status_code=400, detail="Invalid token")
+        raise HTTPException(
+            status_code=400,
+            detail=ErrorResponse(error={"message": "Invalid token"}).dict()
+        )
     user = user_service.get_user_by_email(db, email=email)
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(
+            status_code=404,
+            detail=ErrorResponse(error={"message": "User not found"}).dict()
+        )
     user_service.update_password(db, user=user, new_password=new_password)
-    return success_response(message="Password updated successfully")
+    return SuccessResponse(message="Password updated successfully")
 
-@router.post("/password/update", response_model=ResponseModel)
+@router.post("/password/update", response_model=SuccessResponse)
 def update_password(
     *,
     db: Session = Depends(get_db),
@@ -128,11 +139,14 @@ def update_password(
     Update password.
     """
     if not user_service.verify_password(current_password, current_user.hashed_password):
-        raise HTTPException(status_code=400, detail="Incorrect password")
+        raise HTTPException(
+            status_code=400,
+            detail=ErrorResponse(error={"message": "Incorrect password"}).dict()
+        )
     user_service.update_password(db, user=current_user, new_password=new_password)
-    return success_response(message="Password updated successfully")
+    return SuccessResponse(message="Password updated successfully")
 
-@router.post("/logout", response_model=ResponseModel)
+@router.post("/logout", response_model=SuccessResponse)
 def logout(
     current_user: User = Depends(get_current_user),
 ) -> Any:
@@ -141,4 +155,4 @@ def logout(
     """
     # TODO: Implement token blacklist
     print(f"Logout user: {current_user}")
-    return success_response(message="Successfully logged out") 
+    return SuccessResponse(message="Successfully logged out") 

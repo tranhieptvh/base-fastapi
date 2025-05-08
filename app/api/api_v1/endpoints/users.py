@@ -7,11 +7,11 @@ from app.db.models import User
 from app.schemas.user import User as UserSchema, UserCreate, UserUpdate
 from app.services import user as user_service
 from app.core.exceptions import NotFoundException, ValidationException
-from app.core.response import ResponseModel, success_response
+from app.core.response import SuccessResponse, ErrorResponse
 
 router = APIRouter()
 
-@router.post("/", response_model=ResponseModel[UserSchema], status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=SuccessResponse[UserSchema], status_code=status.HTTP_201_CREATED)
 def create_user(
     *,
     db: Session = Depends(get_db),
@@ -25,12 +25,12 @@ def create_user(
     if user:
         raise HTTPException(
             status_code=400,
-            detail="The user with this email already exists in the system.",
+            detail=ErrorResponse(error={"message": "The user with this email already exists in the system."}).dict()
         )
     db_user = user_service.create_user(db, obj_in=user_in)
-    return success_response(data=db_user, message="User created successfully")
+    return SuccessResponse(data=db_user, message="User created successfully")
 
-@router.get("/", response_model=ResponseModel[List[UserSchema]])
+@router.get("/", response_model=SuccessResponse[List[UserSchema]])
 def read_users(
     db: Session = Depends(get_db),
     skip: int = 0,
@@ -41,18 +41,18 @@ def read_users(
     Retrieve users.
     """
     users = user_service.get_users(db, skip=skip, limit=limit)
-    return success_response(data=users)
+    return SuccessResponse(data=users)
 
-@router.get("/me", response_model=ResponseModel[UserSchema])
+@router.get("/me", response_model=SuccessResponse[UserSchema])
 def read_user_me(
     current_user: User = Depends(get_current_user),
 ):
     """
     Get current user.
     """
-    return success_response(data=current_user)
+    return SuccessResponse(data=current_user)
 
-@router.get("/{user_id}", response_model=ResponseModel[UserSchema])
+@router.get("/{user_id}", response_model=SuccessResponse[UserSchema])
 def read_user_by_id(
     user_id: int,
     current_user: User = Depends(get_current_user),
@@ -63,14 +63,15 @@ def read_user_by_id(
     """
     user = user_service.get_user(db, user_id=user_id)
     if user == current_user:
-        return success_response(data=user)
+        return SuccessResponse(data=user)
     if not current_user.is_superuser:
         raise HTTPException(
-            status_code=400, detail="The user doesn't have enough privileges"
+            status_code=400,
+            detail=ErrorResponse(error={"message": "The user doesn't have enough privileges"}).dict()
         )
-    return success_response(data=user)
+    return SuccessResponse(data=user)
 
-@router.put("/{user_id}", response_model=ResponseModel[UserSchema])
+@router.put("/{user_id}", response_model=SuccessResponse[UserSchema])
 def update_user(
     *,
     db: Session = Depends(get_db),
@@ -85,16 +86,16 @@ def update_user(
     if not user:
         raise NotFoundException("User not found")
     db_user = user_service.update_user(db, db_obj=user, obj_in=user_in)
-    return success_response(data=db_user, message="User updated successfully")
+    return SuccessResponse(data=db_user, message="User updated successfully")
 
-@router.delete("/{user_id}", response_model=ResponseModel)
+@router.delete("/{user_id}", response_model=SuccessResponse)
 def delete_user(user_id: int, db: Session = Depends(get_db)):
     success = user_service.delete_user(db, user_id=user_id)
     if not success:
         raise NotFoundException("User not found")
-    return success_response(message="User deleted successfully")
+    return SuccessResponse(message="User deleted successfully")
 
-@router.put("/me", response_model=ResponseModel[UserSchema])
+@router.put("/me", response_model=SuccessResponse[UserSchema])
 def update_user_me(
     *,
     db: Session = Depends(get_db),
@@ -105,4 +106,4 @@ def update_user_me(
     Update own user.
     """
     user = user_service.update_user(db, db_obj=current_user, obj_in=user_in)
-    return success_response(data=user, message="User updated successfully") 
+    return SuccessResponse(data=user, message="User updated successfully") 

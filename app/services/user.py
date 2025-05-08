@@ -1,11 +1,12 @@
 from typing import List, Optional
 from sqlalchemy.orm import Session
-from app.db.models import User
+from app.db.models import User, Role
 from app.schemas.user import UserCreate, UserUpdate
 from app.core.security import get_password_hash, verify_password
 from datetime import datetime, timedelta
 from jose import jwt
 from app.core.config import settings
+from app.core.enums import RoleEnum
 
 def get_user(db: Session, user_id: int) -> Optional[User]:
     return db.query(User).filter(User.id == user_id).first()
@@ -20,11 +21,21 @@ def get_users(db: Session, skip: int = 0, limit: int = 100) -> List[User]:
     return db.query(User).offset(skip).limit(limit).all()
 
 def create_user(db: Session, obj_in: UserCreate) -> User:
+    # Get default user role if role_id is not provided
+    if obj_in.role_id is None:
+        user_role = Role.get_default_role(db)
+        if not user_role:
+            raise ValueError("Default user role not found")
+        role_id = user_role.id
+    else:
+        role_id = obj_in.role_id
+
     db_obj = User(
         email=obj_in.email,
         username=obj_in.username,
         password=get_password_hash(obj_in.password),
         full_name=obj_in.full_name,
+        role_id=role_id,
         is_active=True,
     )
     db.add(db_obj)

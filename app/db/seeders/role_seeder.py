@@ -1,5 +1,6 @@
 from app.db.models.role import Role
 from app.db.seeders.base import BaseSeeder
+from app.core.enums import RoleEnum
 
 class RoleSeeder(BaseSeeder):
     def run(self):
@@ -11,13 +12,13 @@ class RoleSeeder(BaseSeeder):
         # Create roles
         admin_role = self.create(
             Role,
-            name="admin"
+            name=RoleEnum.ADMIN.value
         )
         print(f"Created admin role: {admin_role.name}")
         
         user_role = self.create(
             Role,
-            name="user"
+            name=RoleEnum.USER.value
         )
         print(f"Created user role: {user_role.name}")
         

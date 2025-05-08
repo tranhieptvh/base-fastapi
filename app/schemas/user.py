@@ -2,12 +2,28 @@ from typing import Optional
 from pydantic import BaseModel, EmailStr, Field, validator
 from datetime import datetime
 from app.dependencies.db import SessionLocal
-from app.db.models import User as UserModel
+from app.db.models import User as UserModel, Role
+from app.core.enums import RoleEnum
 
 class UserBase(BaseModel):
     email: EmailStr
     username: str = Field(..., min_length=3, max_length=50)
     full_name: Optional[str] = None
+    role_id: Optional[int] = None
+
+    @validator('role_id')
+    def validate_role_id(cls, v):
+        if v is not None:
+            db = SessionLocal()
+            try:
+                role = db.query(Role).filter(Role.id == v).first()
+                if not role:
+                    raise ValueError('Role not found')
+                if role.name not in [r.value for r in RoleEnum]:
+                    raise ValueError('Invalid role')
+            finally:
+                db.close()
+        return v
 
 class UserCreate(UserBase):
     password: str = Field(..., min_length=6)

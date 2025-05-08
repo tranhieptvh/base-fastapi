@@ -1,24 +1,20 @@
-from typing import TypeVar, Generic, Optional, Any, Dict, List
+from typing import Any, Dict, Optional, TypeVar, Generic
 from pydantic import BaseModel
 
 T = TypeVar('T')
 
-class ResponseModel(BaseModel, Generic[T]):
+class BaseResponse(BaseModel):
+    status: str
+
+class SuccessResponse(BaseResponse, Generic[T]):
     status: str = "success"
     data: Optional[T] = None
-    message: Optional[str] = None
+    message: str = "Operation completed successfully"
 
-class ErrorDetail(BaseModel):
-    field: Optional[str] = None
-    message: str
-
-class ErrorResponse(BaseModel):
+class ErrorResponse(BaseResponse):
     status: str = "error"
     error: Dict[str, Any]
 
+# For backward compatibility
 def success_response(data: Any = None, message: str = "Operation completed successfully") -> Dict[str, Any]:
-    return {
-        "status": "success",
-        "data": data,
-        "message": message
-    } 
+    return SuccessResponse(data=data, message=message).dict() 
