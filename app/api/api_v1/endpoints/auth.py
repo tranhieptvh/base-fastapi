@@ -23,7 +23,7 @@ from app.core.response import SuccessResponse, ErrorResponse
 router = APIRouter()
 
 @router.post("/register", response_model=SuccessResponse[UserSchema])
-def register_user(
+async def register_user(
     *,
     db: Session = Depends(get_db),
     user_in: UserCreate,
@@ -37,7 +37,7 @@ def register_user(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=ErrorResponse(error={"message": "The user with this email already exists in the system."}).dict()
         )
-    user = user_service.create_user(db, obj_in=user_in)
+    user = await user_service.create_user(db, obj_in=user_in)
     return SuccessResponse(data=user, message="User registered successfully")
 
 @router.post("/login", response_model=Token)

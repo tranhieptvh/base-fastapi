@@ -12,7 +12,7 @@ from app.core.response import SuccessResponse, ErrorResponse
 router = APIRouter()
 
 @router.post("/", response_model=SuccessResponse[UserSchema], status_code=status.HTTP_201_CREATED)
-def create_user(
+async def create_user(
     *,
     db: Session = Depends(get_db),
     user_in: UserCreate,
@@ -27,7 +27,7 @@ def create_user(
             status_code=400,
             detail=ErrorResponse(error={"message": "The user with this email already exists in the system."}).dict()
         )
-    db_user = user_service.create_user(db, obj_in=user_in)
+    db_user = await user_service.create_user(db, obj_in=user_in)
     return SuccessResponse(data=db_user, message="User created successfully")
 
 @router.get("/", response_model=SuccessResponse[List[UserSchema]])

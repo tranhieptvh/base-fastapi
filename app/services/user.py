@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from jose import jwt
 from app.core.config import settings
 from app.core.enums import RoleEnum
+from app.services.email import send_welcome_email
 
 def get_user(db: Session, user_id: int) -> Optional[User]:
     return db.query(User).filter(User.id == user_id).first()
@@ -20,7 +21,7 @@ def get_user_by_username(db: Session, username: str) -> Optional[User]:
 def get_users(db: Session, skip: int = 0, limit: int = 100) -> List[User]:
     return db.query(User).offset(skip).limit(limit).all()
 
-def create_user(db: Session, obj_in: UserCreate) -> User:
+async def create_user(db: Session, obj_in: UserCreate) -> User:
     # Get default user role if role_id is not provided
     if obj_in.role_id is None:
         user_role = Role.get_default_role(db)
@@ -41,6 +42,10 @@ def create_user(db: Session, obj_in: UserCreate) -> User:
     db.add(db_obj)
     db.commit()
     db.refresh(db_obj)
+
+    # Send welcome email
+    await send_welcome_email(email_to=db_obj.email, username=db_obj.username)
+    
     return db_obj
 
 def update_user(

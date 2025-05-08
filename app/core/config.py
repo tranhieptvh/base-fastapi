@@ -9,6 +9,9 @@ class Settings(BaseSettings):
     # BACKEND_CORS_ORIGINS is a JSON-formatted list of origins
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
 
+    # Frontend URL for email templates
+    FRONTEND_URL: str = "http://localhost:3000"
+
     # Database
     MYSQL_ROOT_PASSWORD: str
     MYSQL_DATABASE: str
@@ -20,6 +23,14 @@ class Settings(BaseSettings):
     SECRET_KEY: str
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60*24
+
+    # Email settings
+    MAIL_USERNAME: str
+    MAIL_PASSWORD: str
+    MAIL_FROM: str
+    MAIL_PORT: int = 587
+    MAIL_SERVER: str = "smtp.gmail.com"
+    MAIL_FROM_NAME: str
 
     class Config:
         case_sensitive = True
