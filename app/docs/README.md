@@ -18,36 +18,52 @@ This is a modern FastAPI project template that provides a solid foundation for b
 
 ```
 app/
-├── api/
-│   ├── api_v1/
-│   │   ├── endpoints/
-│   │   │   ├── auth.py      # Authentication endpoints
-│   │   │   └── users.py     # User management endpoints
-│   │   └── api.py          # API router configuration
+├── api/                    # API layer
+│   ├── api_v1/            # API version 1
+│   │   ├── endpoints/     # API endpoints
+│   │   │   ├── auth.py    # Authentication endpoints
+│   │   │   ├── users.py   # User management endpoints
+│   │   │   └── ping.py    # Health check endpoint
+│   │   └── api.py        # API router configuration
 │   └── __init__.py
-├── core/
-│   ├── config.py           # Application configuration
-│   ├── security.py         # Security utilities
-│   ├── middleware.py       # Custom middleware
-│   ├── exceptions.py       # Custom exceptions
-│   ├── response.py         # Response models
+├── core/                  # Core functionality
+│   ├── config.py         # Application configuration
+│   ├── security.py       # Security utilities (JWT, password hashing)
+│   ├── middleware.py     # Custom middleware
+│   ├── exceptions.py     # Custom exceptions
+│   ├── response.py       # Response models
+│   ├── enums.py         # Enum definitions
 │   └── __init__.py
-├── db/
-│   ├── base.py            # SQLAlchemy base
-│   ├── init_db.py         # Database initialization
-│   ├── models/            # Database models
-│   ├── seeders/           # Database seeders
+├── db/                   # Database layer
+│   ├── base.py          # SQLAlchemy base
+│   ├── init_db.py       # Database initialization
+│   ├── models/          # Database models
+│   │   ├── user.py     # User model
+│   │   └── role.py     # Role model
+│   ├── seeders/        # Database seeders
+│   │   ├── base.py    # Base seeder class
+│   │   ├── role_seeder.py
+│   │   └── user_seeder.py
 │   └── __init__.py
-├── dependencies/
-│   ├── __init__.py        # Dependency exports
-│   ├── auth.py            # Authentication dependencies
-│   └── db.py              # Database dependencies
-├── schemas/
-│   ├── token.py           # Token schemas
-│   └── user.py            # User schemas
-├── services/
-│   └── user.py            # User business logic
-├── docs/                  # Project documentation
+├── dependencies/        # Dependency injection
+│   ├── __init__.py     # Dependency exports
+│   ├── auth.py         # Authentication dependencies
+│   └── db.py           # Database dependencies
+├── schemas/            # Pydantic schemas
+│   ├── token.py        # Token schemas
+│   └── user.py         # User schemas
+├── services/           # Business logic layer
+│   └── user.py         # User business logic
+├── docs/              # Project documentation
+│   └── README.md      # This documentation file
+├── tests/             # Test files
+│   ├── conftest.py    # Test configuration
+│   ├── test_api/      # API tests
+│   └── test_services/ # Service tests
+├── alembic/           # Database migrations
+│   ├── versions/      # Migration versions
+│   └── env.py         # Migration environment
+├── main.py           # Application entry point
 └── __init__.py
 ```
 
@@ -72,26 +88,105 @@ app/
    - Invalidates current session
    - Clears client-side tokens
 
-## API Endpoints
+## Middleware
 
-### Authentication
+The project includes several middleware components to enhance security and functionality:
 
-- `POST /api/v1/auth/register` - Register new user
-- `POST /api/v1/auth/login` - Login and get token
-- `POST /api/v1/auth/password-reset` - Request password reset
-- `POST /api/v1/auth/password-reset/confirm` - Reset password
-- `POST /api/v1/auth/password/update` - Update password
-- `POST /api/v1/auth/logout` - Logout user
+1. **CORS Middleware**
+   - Handles Cross-Origin Resource Sharing
+   - Configurable allowed origins, methods, and headers
+   - Secure by default with strict settings
+   - Location: `app/main.py`
+   - Usage: Applied globally to all routes
 
-### Users
+2. **Authentication Middleware**
+   - JWT token validation
+   - User session management
+   - Role-based access control
+   - Location: `app/dependencies/auth.py`
+   - Usage: Applied via dependency injection `@Depends(get_current_user)`
 
-- `GET /api/v1/users/` - List users
-- `POST /api/v1/users/` - Create user
-- `GET /api/v1/users/me` - Get current user
-- `PUT /api/v1/users/me` - Update current user
-- `GET /api/v1/users/{user_id}` - Get user by ID
-- `PUT /api/v1/users/{user_id}` - Update user
-- `DELETE /api/v1/users/{user_id}` - Delete user
+3. **Error Handling Middleware**
+   - Global exception handling
+   - Standardized error responses
+   - Detailed error logging
+   - Location: `app/core/exceptions.py`
+   - Usage: Registered in `app/main.py`
+
+4. **Validation Exception Handler**
+   - Custom handler for Pydantic validation errors
+   - Location: `app/core/middleware.py`
+   - Usage: Registered in `app/main.py` as exception handler
+   - Transforms validation errors into standardized format consistent with ErrorResponse:
+     ```json
+     {
+         "status": "error",
+         "error": {
+             "message": "Validation error",
+             "code": "VALIDATION_ERROR",
+             "details": {
+                 "fields": [
+                     {
+                         "field": "email",
+                         "message": "invalid email format",
+                         "type": "value_error.email"
+                     }
+                 ]
+             }
+         }
+     }
+     ```
+   - Provides clear error messages for:
+     - Invalid data types
+     - Missing required fields
+     - Format validation (email, password, etc.)
+     - Custom validation rules
+   - Maintains consistent error response structure with ErrorResponse
+   - Improves API documentation with clear error examples
+
+## Request & Response Handling
+
+### Request Validation
+- Pydantic models for request validation
+- Automatic type conversion
+- Custom validators for complex rules
+- Detailed error messages for invalid inputs
+
+### Response Format
+```json
+{
+    "status": "success",
+    "data": {
+        // Response data here
+    },
+    "message": "Operation completed successfully"
+}
+```
+
+### Error Response Format
+```json
+{
+    "status": "error",
+    "error": {
+        "message": "Error description",
+        "code": "ERROR_CODE",
+        "details": {
+            // Additional error details
+        }
+    }
+}
+```
+
+### Response Models
+1. **SuccessResponse**
+   - Generic type for data
+   - Optional message field
+   - Consistent success status
+
+2. **ErrorResponse**
+   - Standardized error format
+   - HTTP status code mapping
+   - Detailed error information
 
 ## Development Setup
 
