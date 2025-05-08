@@ -12,13 +12,15 @@ class RoleSeeder(BaseSeeder):
         # Create roles
         admin_role = self.create(
             Role,
-            name=RoleEnum.ADMIN.value
+            id=RoleEnum.ADMIN.value,
+            name="admin"
         )
         print(f"Created admin role: {admin_role.name}")
         
         user_role = self.create(
             Role,
-            name=RoleEnum.USER.value
+            id=RoleEnum.USER.value,
+            name="user"
         )
         print(f"Created user role: {user_role.name}")
         

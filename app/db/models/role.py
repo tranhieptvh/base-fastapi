@@ -15,9 +15,9 @@ class Role(Base):
     @classmethod
     def get_default_role(cls, db):
         """Get default user role"""
-        return db.query(cls).filter_by(name=RoleEnum.USER.value).first()
+        return db.query(cls).filter_by(id=RoleEnum.USER.value).first()
 
     @classmethod
     def get_admin_role(cls, db):
         """Get admin role"""
-        return db.query(cls).filter_by(name=RoleEnum.ADMIN.value).first() 
+        return db.query(cls).filter_by(id=RoleEnum.ADMIN.value).first() 

@@ -19,7 +19,7 @@ class UserBase(BaseModel):
                 role = db.query(Role).filter(Role.id == v).first()
                 if not role:
                     raise ValueError('Role not found')
-                if role.name not in [r.value for r in RoleEnum]:
+                if v not in [r.value for r in RoleEnum]:
                     raise ValueError('Invalid role')
             finally:
                 db.close()

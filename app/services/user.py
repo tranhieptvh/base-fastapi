@@ -21,6 +21,12 @@ def get_user_by_username(db: Session, username: str) -> Optional[User]:
 def get_users(db: Session, skip: int = 0, limit: int = 100) -> List[User]:
     return db.query(User).offset(skip).limit(limit).all()
 
+def get_default_users(db: Session, skip: int = 0, limit: int = 100) -> List[User]:
+    return db.query(User).filter(
+        User.role_id == RoleEnum.USER.value,
+        User.is_active == True
+    ).offset(skip).limit(limit).all()
+
 async def create_user(db: Session, obj_in: UserCreate) -> User:
     # Get default user role if role_id is not provided
     if obj_in.role_id is None:
