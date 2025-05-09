@@ -51,3 +51,8 @@ poetry.lock
 .env.development.local
 .env.test.local
 .env.production.local 
+
+
+# Celery
+celerybeat-schedule
+celerybeat-schedule.db

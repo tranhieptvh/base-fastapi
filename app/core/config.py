@@ -32,6 +32,13 @@ class Settings(BaseSettings):
     MAIL_SERVER: str = "smtp.gmail.com"
     MAIL_FROM_NAME: str
 
+    # Celery settings
+    CELERY_BROKER_URL: str = "redis://localhost:6379/0"
+    CELERY_RESULT_BACKEND: str = "redis://localhost:6379/0"
+    CELERY_WORKER_CONCURRENCY: int = 4
+    CELERY_MAX_TASKS_PER_CHILD: int = 1000
+    CELERY_MAX_MEMORY_PER_CHILD: int = 200000
+
     class Config:
         case_sensitive = True
         env_file = ".env"

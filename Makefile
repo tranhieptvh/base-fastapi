@@ -3,7 +3,7 @@ build:
 
 up:
 	sudo service apache2 stop
-	docker compose up -d
+	docker compose up -d app db
 
 down:
 	docker compose down
@@ -17,4 +17,7 @@ exec:
 # Full cleanup
 clean:
 	docker compose down -v --rmi all
+
+up-worker:
+	docker compose up -d worker beat
 
