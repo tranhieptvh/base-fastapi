@@ -2,7 +2,7 @@
 name = "base-fastapi"
 version = "0.1.0"
 description = "Base FastAPI project with SQLAlchemy, Alembic, and JWT authentication"
-authors = ["Your Name <your.email@example.com>"]
+authors = ["HiepTV <tranhieptvh@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]

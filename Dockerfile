@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Poetry
-RUN pip install poetry==1.7.1
+RUN pip install poetry
 
 # Copy poetry files
 COPY pyproject.toml poetry.lock* ./
@@ -17,13 +17,10 @@ COPY pyproject.toml poetry.lock* ./
 RUN poetry config virtualenvs.create false
 
 # Install dependencies
-RUN poetry install --no-interaction --no-ansi
+RUN poetry install --no-interaction --no-ansi --no-root
 
 # Copy project files
 COPY . .
 
 # Expose port
-EXPOSE 8000
-
-# Run the application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"] 
+EXPOSE 8000 

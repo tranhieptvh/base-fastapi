@@ -21,3 +21,6 @@ clean:
 up-worker:
 	docker compose up -d worker beat
 
+down-worker:
+	docker compose down worker beat
+
