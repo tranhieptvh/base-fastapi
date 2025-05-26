@@ -12,7 +12,7 @@ restart:
 	docker compose restart
 
 exec:
-	docker compose exec -it api bash
+	docker compose exec -it app bash
 
 # Full cleanup
 clean:

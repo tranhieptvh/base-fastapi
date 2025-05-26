@@ -16,11 +16,11 @@ COPY pyproject.toml poetry.lock* ./
 # Configure poetry
 RUN poetry config virtualenvs.create false
 
-# Install dependencies
-RUN poetry install --no-interaction --no-ansi --no-root
+# Update lock file and install dependencies
+RUN poetry lock && poetry install --no-interaction --no-ansi --no-root
 
 # Copy project files
 COPY . .
 
-# Expose port
-EXPOSE 8000 
+# Expose ports
+EXPOSE 8000 5678 
