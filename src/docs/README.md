@@ -19,13 +19,10 @@ This is a modern FastAPI project template that provides a solid foundation for b
 ```
 app/
 ├── api/                    # API layer
-│   ├── api_v1/            # API version 1
-│   │   ├── endpoints/     # API endpoints
-│   │   │   ├── auth.py    # Authentication endpoints
-│   │   │   ├── users.py   # User management endpoints
-│   │   │   └── ping.py    # Health check endpoint
-│   │   └── api.py        # API router configuration
-│   └── __init__.py
+│   ├── auth.py            # Authentication endpoints
+│   ├── users.py           # User management endpoints
+│   ├── ping.py            # Health check endpoint
+│   └── __init__.py        # API router configuration
 ├── core/                  # Core functionality
 │   ├── config.py         # Application configuration
 │   ├── security.py       # Security utilities (JWT, password hashing)
