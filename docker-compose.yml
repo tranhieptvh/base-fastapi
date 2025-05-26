@@ -16,7 +16,7 @@ services:
         condition: service_healthy
       db:
         condition: service_healthy
-    command: python -m debugpy --listen 0.0.0.0:5678 --wait-for-client -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    command: python -Xfrozen_modules=off -m debugpy --listen 0.0.0.0:5678 -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     networks:
       - app-network
     environment:
@@ -27,7 +27,7 @@ services:
   worker:
     build: .
     container_name: fastapi_worker
-    command: celery -A app.core.celery_app worker -Q email_queue -l info
+    command: celery -A src.core.celery_app worker -Q email_queue -l info
     volumes:
       - .:/app
     env_file:
@@ -46,7 +46,7 @@ services:
   beat:
     build: .
     container_name: fastapi_beat
-    command: celery -A app.core.celery_app beat -l info
+    command: celery -A src.core.celery_app beat -l info
     volumes:
       - .:/app
     env_file:

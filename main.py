@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
-from app.core.config import settings
-from app.api.api_v1.api import api_router
-from app.core.middleware import validation_exception_handler
+from src.core.config import settings
+from src.api.api_v1.api import api_router
+from src.core.middleware import validation_exception_handler
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
