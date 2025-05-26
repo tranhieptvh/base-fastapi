@@ -12,13 +12,6 @@ A base FastAPI project with SQLAlchemy, Alembic, and JWT authentication.
 - Task queue with Celery and Redis
 - Environment configuration with python-dotenv
 
-## Setup
-
-1. Clone the repository
-2. Install dependencies with Poetry: `poetry install`
-3. Configure your .env file
-4. Run the application: `poetry run uvicorn app.main:app --reload`
-
 ## Development
 
 This project uses Poetry for dependency management and includes development tools:
