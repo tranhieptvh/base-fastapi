@@ -7,7 +7,7 @@ from src.core.middleware import validation_exception_handler
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
-    openapi_url=f"{settings.API_V1_STR}/openapi.json"
+    openapi_url=f"{settings.API_STR}/openapi.json"
 )
 
 # Set all CORS enabled origins
@@ -23,7 +23,7 @@ if settings.BACKEND_CORS_ORIGINS:
 # Register exception handlers
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 
-app.include_router(api_router, prefix=settings.API_V1_STR)
+app.include_router(api_router, prefix=settings.API_STR)
 
 @app.get("/")
 def root():

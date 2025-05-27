@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings
 from pydantic import AnyHttpUrl
 
 class Settings(BaseSettings):
-    API_V1_STR: str = "/api/v1"
+    API_STR: str = "/api"
     PROJECT_NAME: str = "FastAPI Project"
     
     # BACKEND_CORS_ORIGINS is a JSON-formatted list of origins
