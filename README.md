@@ -26,15 +26,19 @@ This project uses Poetry for dependency management and includes development tool
 ```
 .
 ├── alembic/              # Database migrations
-├── app/                  # Application source code
+├── src/                  # Application source code
 │   ├── api/             # API endpoints
 │   ├── core/            # Core functionality
 │   ├── db/              # Database models and session
 │   ├── dependencies/    # Application dependencies
 │   ├── schemas/         # Pydantic models
 │   ├── services/        # Business logic
+│   ├── tasks/           # Celery tasks
+│   ├── templates/       # Email templates
 │   └── docs/           # Project documentation
 ├── tests/               # Test files
+│   ├── api/            # API tests
+│   └── conftest.py     # Test configuration
 ├── .env                 # Environment variables
 ├── .env.example         # Example environment variables
 ├── alembic.ini          # Alembic configuration
@@ -85,7 +89,7 @@ cp .env.example .env
 
 4. Run the application:
 ```bash
-poetry run uvicorn app.main:app --reload
+poetry run uvicorn src.main:app --reload
 ```
 
 ## Development

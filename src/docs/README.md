@@ -17,51 +17,62 @@ This is a modern FastAPI project template that provides a solid foundation for b
 ## Detail Project Structure
 
 ```
-app/
-├── api/                    # API layer
-│   ├── auth.py            # Authentication endpoints
-│   ├── users.py           # User management endpoints
-│   ├── ping.py            # Health check endpoint
-│   └── __init__.py        # API router configuration
-├── core/                  # Core functionality
-│   ├── config.py         # Application configuration
-│   ├── security.py       # Security utilities (JWT, password hashing)
-│   ├── middleware.py     # Custom middleware
-│   ├── exceptions.py     # Custom exceptions
-│   ├── response.py       # Response models
-│   ├── enums.py         # Enum definitions
+.
+├── src/                    # Application source code
+│   ├── api/               # API layer
+│   │   ├── auth.py        # Authentication endpoints
+│   │   ├── users.py       # User management endpoints
+│   │   ├── ping.py        # Health check endpoint
+│   │   └── __init__.py    # API router configuration
+│   ├── core/              # Core functionality
+│   │   ├── config.py      # Application configuration
+│   │   ├── security.py    # Security utilities (JWT, password hashing)
+│   │   ├── middleware.py  # Custom middleware
+│   │   ├── exceptions.py  # Custom exceptions
+│   │   ├── response.py    # Response models
+│   │   ├── enums.py      # Enum definitions
+│   │   └── __init__.py
+│   ├── db/               # Database layer
+│   │   ├── base.py       # SQLAlchemy base
+│   │   ├── init_db.py    # Database initialization
+│   │   ├── models/       # Database models
+│   │   │   ├── user.py   # User model
+│   │   │   └── role.py   # Role model
+│   │   ├── seeders/      # Database seeders
+│   │   │   ├── base.py   # Base seeder class
+│   │   │   ├── role_seeder.py
+│   │   │   └── user_seeder.py
+│   │   └── __init__.py
+│   ├── dependencies/     # Dependency injection
+│   │   ├── __init__.py   # Dependency exports
+│   │   ├── auth.py       # Authentication dependencies
+│   │   └── db.py         # Database dependencies
+│   ├── schemas/          # Pydantic schemas
+│   │   ├── token.py      # Token schemas
+│   │   └── user.py       # User schemas
+│   ├── services/         # Business logic layer
+│   │   └── user.py       # User business logic
+│   ├── tasks/            # Celery tasks
+│   │   └── __init__.py   # Task configuration
+│   ├── templates/        # Email templates
+│   │   └── email/        # Email HTML templates
+│   ├── docs/             # Project documentation
+│   │   └── README.md     # This documentation file
+│   ├── main.py          # Application entry point
 │   └── __init__.py
-├── db/                   # Database layer
-│   ├── base.py          # SQLAlchemy base
-│   ├── init_db.py       # Database initialization
-│   ├── models/          # Database models
-│   │   ├── user.py     # User model
-│   │   └── role.py     # Role model
-│   ├── seeders/        # Database seeders
-│   │   ├── base.py    # Base seeder class
-│   │   ├── role_seeder.py
-│   │   └── user_seeder.py
-│   └── __init__.py
-├── dependencies/        # Dependency injection
-│   ├── __init__.py     # Dependency exports
-│   ├── auth.py         # Authentication dependencies
-│   └── db.py           # Database dependencies
-├── schemas/            # Pydantic schemas
-│   ├── token.py        # Token schemas
-│   └── user.py         # User schemas
-├── services/           # Business logic layer
-│   └── user.py         # User business logic
-├── docs/              # Project documentation
-│   └── README.md      # This documentation file
-├── tests/             # Test files
-│   ├── conftest.py    # Test configuration
-│   ├── test_api/      # API tests
-│   └── test_services/ # Service tests
-├── alembic/           # Database migrations
-│   ├── versions/      # Migration versions
-│   └── env.py         # Migration environment
-├── main.py           # Application entry point
-└── __init__.py
+├── tests/                # Test files
+│   ├── api/             # API tests
+│   │   └── test_auth.py # Authentication tests
+│   └── conftest.py      # Test configuration
+├── alembic/             # Database migrations
+│   ├── versions/        # Migration versions
+│   └── env.py          # Migration environment
+├── .env                 # Environment variables
+├── .env.example         # Example environment variables
+├── alembic.ini          # Alembic configuration
+├── pyproject.toml       # Poetry configuration
+├── Dockerfile          # Docker configuration
+└── docker-compose.yml  # Docker Compose configuration
 ```
 
 ## Authentication Flow
@@ -206,12 +217,12 @@ The project includes several middleware components to enhance security and funct
    poetry run alembic upgrade head
 
    # Seed initial data
-   poetry run python -m app.db.init_db
+   poetry run python -m src.db.init_db
    ```
 
 3. **Run Development Server**
    ```bash
-   poetry run uvicorn app.main:app --reload
+   poetry run uvicorn src.main:app --reload
    ```
 
 ## Testing
