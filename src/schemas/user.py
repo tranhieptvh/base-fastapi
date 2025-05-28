@@ -1,7 +1,7 @@
 from typing import Optional
 from pydantic import BaseModel, EmailStr, Field, validator
 from datetime import datetime
-from src.dependencies.db import SessionLocal
+from src.db.session import SessionLocal
 from src.db.models import User as UserModel, Role
 from src.core.enums import RoleEnum
 
@@ -95,14 +95,3 @@ class User(UserInDBBase):
 
 class UserInDB(UserInDBBase):
     password: str
-
-class PasswordReset(BaseModel):
-    email: EmailStr
-
-class PasswordUpdate(BaseModel):
-    current_password: str
-    new_password: str = Field(..., min_length=6)
-
-class PasswordResetConfirm(BaseModel):
-    token: str
-    new_password: str = Field(..., min_length=6) 

@@ -1,14 +1,24 @@
-from typing import List
+from typing import List, Optional
 from pydantic_settings import BaseSettings
-from pydantic import AnyHttpUrl
+from pydantic import AnyHttpUrl, ConfigDict
 
 class Settings(BaseSettings):
+    # API
     API_STR: str = "/api"
     PROJECT_NAME: str = "FastAPI Project"
     
-    # BACKEND_CORS_ORIGINS is a JSON-formatted list of origins
-    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
-
+    # JWT
+    SECRET_KEY: str = "your-secret-key-here"  # Change in production
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+    
+    # Database
+    DATABASE_URL: str = "sqlite:///./sql_app.db"
+    
+    # CORS
+    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = ["http://localhost:3000"]
+    
     # Frontend URL for email templates
     FRONTEND_URL: str = "http://localhost:3000"
 
@@ -17,12 +27,6 @@ class Settings(BaseSettings):
     MYSQL_DATABASE: str
     MYSQL_USER: str
     MYSQL_PASSWORD: str
-    DATABASE_URL: str
-
-    # Security
-    SECRET_KEY: str
-    ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60*24
 
     # Email settings
     MAIL_USERNAME: str
@@ -38,6 +42,10 @@ class Settings(BaseSettings):
     CELERY_WORKER_CONCURRENCY: int = 4
     CELERY_MAX_TASKS_PER_CHILD: int = 1000
     CELERY_MAX_MEMORY_PER_CHILD: int = 200000
+
+    @property
+    def SQLALCHEMY_DATABASE_URL(self) -> str:
+        return self.DATABASE_URL
 
     class Config:
         case_sensitive = True

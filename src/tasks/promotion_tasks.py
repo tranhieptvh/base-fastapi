@@ -3,7 +3,7 @@ from src.core.enums import RoleEnum
 from sqlalchemy.orm import Session
 from src.core.celery_app import celery_app
 from src.services.email import send_email
-from src.dependencies.db import SessionLocal
+from src.db.session import SessionLocal
 from src.services.user import get_default_users
 from datetime import datetime
 from src.core.config import settings

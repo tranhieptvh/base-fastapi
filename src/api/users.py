@@ -1,8 +1,8 @@
 from typing import Any, List
 from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
-from src.dependencies import get_db, get_current_user, get_current_active_user
+from src.db.session import get_db
+from src.dependencies import get_current_user, get_current_active_user
 from src.db.models import User
 from src.schemas.user import User as UserSchema, UserCreate, UserUpdate
 from src.services import user as user_service

@@ -18,4 +18,5 @@ class User(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # Relationships
-    role = relationship("Role", back_populates="users") 
+    role = relationship("Role", back_populates="users")
+    refresh_tokens = relationship("RefreshToken", back_populates="user", cascade="all, delete-orphan") 
