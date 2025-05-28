@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel, EmailStr, Field, validator
+from pydantic import BaseModel, EmailStr, Field, field_validator, ConfigDict
 from datetime import datetime
 from src.db.session import SessionLocal
 from src.db.models import User as UserModel, Role
@@ -11,7 +11,7 @@ class UserBase(BaseModel):
     full_name: Optional[str] = None
     role_id: Optional[int] = None
 
-    @validator('role_id')
+    @field_validator('role_id')
     def validate_role_id(cls, v):
         if v is not None:
             db = SessionLocal()
@@ -28,7 +28,7 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str = Field(..., min_length=6)
 
-    @validator('email')
+    @field_validator('email')
     def email_must_be_unique(cls, v):
         db = SessionLocal()
         try:
@@ -38,7 +38,7 @@ class UserCreate(UserBase):
             db.close()
         return v
 
-    @validator('username')
+    @field_validator('username')
     def username_must_be_unique(cls, v):
         db = SessionLocal()
         try:
@@ -54,7 +54,7 @@ class UserUpdate(BaseModel):
     full_name: Optional[str] = None
     password: Optional[str] = Field(None, min_length=6)
 
-    @validator('email')
+    @field_validator('email')
     def email_must_be_unique(cls, v):
         if v is None:
             return v
@@ -66,7 +66,7 @@ class UserUpdate(BaseModel):
             db.close()
         return v
 
-    @validator('username')
+    @field_validator('username')
     def username_must_be_unique(cls, v):
         if v is None:
             return v
@@ -84,8 +84,7 @@ class UserInDBBase(UserBase):
     created_at: datetime
     updated_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class UserResponse(UserInDBBase):
     pass

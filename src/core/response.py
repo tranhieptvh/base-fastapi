@@ -1,10 +1,12 @@
 from typing import Any, Dict, Optional, TypeVar, Generic
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 T = TypeVar('T')
 
 class BaseResponse(BaseModel):
     status: str
+    
+    model_config = ConfigDict(from_attributes=True)
 
 class SuccessResponse(BaseResponse, Generic[T]):
     status: str = "success"
