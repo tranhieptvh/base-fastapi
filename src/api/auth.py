@@ -15,7 +15,7 @@ from src.schemas.auth import (
     LogoutRequest,
 )
 from src.services import user as user_service
-from src.core.response import SuccessResponse, ErrorResponse
+from src.core.response import error_response, success_response
 from src.core.security import (
     create_access_token,
     create_and_store_refresh_token,
@@ -26,7 +26,7 @@ from src.core.security import (
 
 router = APIRouter()
 
-@router.post("/register", response_model=UserResponse)
+@router.post("/register")
 async def register(
     user_in: UserCreate,
     db: Session = Depends(get_db)
@@ -34,16 +34,11 @@ async def register(
     """
     Register new user
     """
-    user = user_service.get_user_by_email(db, email=user_in.email)
-    if user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=ErrorResponse(error={"message": "The user with this email already exists in the system."})
-        )
     user = await user_service.create_user(db, obj_in=user_in)
-    return user
+    user_response = UserResponse.model_validate(user)
+    return success_response(data=user_response, message="User created successfully")
 
-@router.post("/login", response_model=Token)
+@router.post("/login")
 async def login(
     response: Response,
     request: LoginRequest,
@@ -60,13 +55,15 @@ async def login(
     access_token = create_access_token(data={"sub": str(user.id)})
     refresh_token = create_and_store_refresh_token(db, user.id)
     
-    return {
+    data = {
         "access_token": access_token,
         "refresh_token": refresh_token,
         "token_type": "bearer"
     }
+    
+    return success_response(data=data, message="Login successful")
 
-@router.post("/refresh-token", response_model=Token)
+@router.post("/refresh-token")
 async def refresh_token(
     response: Response,
     refresh_data: TokenRefresh,
@@ -91,13 +88,15 @@ async def refresh_token(
         max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
     )
     
-    return {
+    data = {
         "access_token": access_token,
         "refresh_token": refresh_data.refresh_token,
         "token_type": "bearer"
     }
+    
+    return success_response(data=data, message="Refresh token successful")
 
-@router.post("/logout", response_model=SuccessResponse)
+@router.post("/logout")
 async def logout(
     request: LogoutRequest,
     db: Session = Depends(get_db)
@@ -111,9 +110,9 @@ async def logout(
         if user_id:
             revoke_refresh_token(db, request.refresh_token)
             
-        return SuccessResponse(message="Successfully logged out")
+        return success_response(message="Successfully logged out")
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=ErrorResponse(error={"message": str(e)})
+            detail=error_response(message=str(e))
         )

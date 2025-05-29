@@ -1,28 +1,25 @@
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
-from src.core.response import ErrorResponse
+from src.core.response import error_response
 
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     """
     Custom handler for Pydantic validation errors.
-    Transforms validation errors into standardized format consistent with ErrorResponse.
+    Transforms validation errors into standardized format.
     
     Example response:
     {
         "status": "error",
-        "error": {
-            "message": "Validation error",
-            "code": "VALIDATION_ERROR",
-            "details": {
-                "fields": [
-                    {
-                        "field": "email",
-                        "message": "invalid email format",
-                        "type": "value_error.email"
-                    }
-                ]
-            }
+        "message": "Validation error",
+        "errors": {
+            "fields": [
+                {
+                    "field": "email",
+                    "message": "invalid email format",
+                    "type": "value_error.email"
+                }
+            ]
         }
     }
     """
@@ -37,17 +34,14 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
             "type": error["type"]
         })
 
-    error_response = ErrorResponse(
-        error={
-            "code": "VALIDATION_ERROR", 
-            "message": "Validation error",
-            "details": {
-                "fields": errors
-            }
+    response = error_response(
+        message="Validation error",
+        errors={
+            "fields": errors
         }
     )
 
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content=error_response.model_dump()
+        content=response
     ) 
