@@ -1,6 +1,6 @@
 from fastapi import HTTPException, status
 from typing import Optional, Dict, Any
-from src.core.response import ErrorResponse
+from src.core.response import error_response
 
 class AppException(HTTPException):
     """
@@ -10,24 +10,38 @@ class AppException(HTTPException):
     def __init__(
         self,
         status_code: int,
-        error_code: str,
         message: str,
-        details: Optional[Dict[str, Any]] = None
+        errors: Optional[Dict[str, Any]] = None
     ):
-        error_response = ErrorResponse(
-            error={
-                "code": error_code,
-                "message": message,
-                "details": details or {}
-            }
+        error_data = error_response(
+            message=message,
+            errors=errors or {}
         )
-        super().__init__(status_code=status_code, detail=error_response.dict())
+        super().__init__(status_code=status_code, detail=error_data)
 
-class ValidationException(HTTPException):
-    def __init__(self, detail: str):
+class ValidationException(AppException):
+    """
+    Base class for validation errors.
+    """
+    def __init__(self, message: str, errors: Optional[Dict[str, Any]] = None):
         super().__init__(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=detail
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            message=message,
+            errors=errors or {}
+        )
+
+class DuplicateEntryException(ValidationException):
+    """
+    Exception for duplicate entry errors.
+    """
+    def __init__(self, field: str, value: str):
+        super().__init__(
+            message=f"{field} already exists",
+            errors={
+                "type": "duplicate_entry",
+                "field": field,
+                "value": value
+            }
         )
 
 class NotFoundException(AppException):
@@ -37,18 +51,17 @@ class NotFoundException(AppException):
     def __init__(self, message: str = "Resource not found"):
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
-            error_code="NOT_FOUND",
-            message=message
+            message=message,
+            errors={"type": "not_found"}
         )
 
-class DuplicateEntryException(AppException):
+class UnauthorizedException(AppException):
     """
-    Exception for duplicate entry errors.
+    Exception for unauthorized access errors.
     """
-    def __init__(self, field: str, value: str):
+    def __init__(self, message: str = "Unauthorized"):
         super().__init__(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            error_code="DUPLICATE_ENTRY",
-            message=f"{field} already exists",
-            details={"field": field, "value": value}
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            message=message,
+            errors={"type": "unauthorized"}
         )

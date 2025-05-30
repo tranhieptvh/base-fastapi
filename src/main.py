@@ -3,7 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from src.core.config import settings
 from src.api import api_router
-from src.core.middleware import validation_exception_handler
+from src.core.middleware import validation_exception_handler, app_exception_handler
+from src.core.exceptions import AppException
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -22,6 +23,7 @@ if settings.BACKEND_CORS_ORIGINS:
 
 # Register exception handlers
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
+app.add_exception_handler(AppException, app_exception_handler)
 
 app.include_router(api_router, prefix=settings.API_STR)
 

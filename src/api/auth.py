@@ -3,6 +3,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy.orm import Session
 
+from src.core.exceptions import AppException, UnauthorizedException
 from src.db.session import get_db
 from src.core.config import settings
 from src.schemas.token import Token, TokenRefresh
@@ -49,7 +50,10 @@ async def login(
     """
     user = user_service.authenticate_user(db, request.email, request.password)
     if not user:
-        raise HTTPException(status_code=401, detail="Incorrect email or password")
+        raise UnauthorizedException(message="Incorrect email or password")
+    
+    if not user.is_active:
+        raise UnauthorizedException(message="Inactive user")
     
     # Create tokens
     access_token = create_access_token(data={"sub": str(user.id)})
@@ -112,7 +116,4 @@ async def logout(
             
         return success_response(message="Successfully logged out")
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=error_response(message=str(e))
-        )
+        raise e

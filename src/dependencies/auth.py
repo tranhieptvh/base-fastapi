@@ -7,6 +7,7 @@ from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
 from src.core.config import settings
+from src.core.exceptions import UnauthorizedException
 from src.db.session import get_db
 from src.db.models import User
 from src.schemas.token import TokenPayload
@@ -34,9 +35,9 @@ def get_current_user(
         )
     user = db.query(User).filter(User.id == token_data.sub).first()
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise UnauthorizedException(message="User not found")
     if not user.is_active:
-        raise HTTPException(status_code=400, detail="Inactive user")
+        raise UnauthorizedException(message="Inactive user")
     return user
 
 def get_current_active_user(
@@ -46,5 +47,5 @@ def get_current_active_user(
     Get current active user
     """
     if not current_user.is_active:
-        raise HTTPException(status_code=400, detail="Inactive user")
+        raise UnauthorizedException(message="Inactive user")
     return current_user 

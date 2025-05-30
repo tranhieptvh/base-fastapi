@@ -4,6 +4,7 @@ from datetime import datetime
 from src.db.session import SessionLocal
 from src.db.models import User as UserModel, Role
 from src.core.enums import RoleEnum
+from src.core.exceptions import DuplicateEntryException, ValidationException
 
 class UserBase(BaseModel):
     email: EmailStr
@@ -18,9 +19,9 @@ class UserBase(BaseModel):
             try:
                 role = db.query(Role).filter(Role.id == v).first()
                 if not role:
-                    raise ValueError('Role not found')
+                    raise ValidationException(message="Role not found")
                 if v not in [r.value for r in RoleEnum]:
-                    raise ValueError('Invalid role')
+                    raise ValidationException(message="Invalid role")
             finally:
                 db.close()
         return v
@@ -33,7 +34,7 @@ class UserCreate(UserBase):
         db = SessionLocal()
         try:
             if db.query(UserModel).filter(UserModel.email == v).first():
-                raise ValueError('Email already registered')
+                raise DuplicateEntryException(field="email", value=v)
         finally:
             db.close()
         return v
@@ -43,7 +44,7 @@ class UserCreate(UserBase):
         db = SessionLocal()
         try:
             if db.query(UserModel).filter(UserModel.username == v).first():
-                raise ValueError('Username already registered')
+                raise DuplicateEntryException(field="username", value=v)
         finally:
             db.close()
         return v
@@ -61,7 +62,7 @@ class UserUpdate(BaseModel):
         db = SessionLocal()
         try:
             if db.query(UserModel).filter(UserModel.email == v).first():
-                raise ValueError('Email already registered')
+                raise DuplicateEntryException(field="email", value=v)
         finally:
             db.close()
         return v
@@ -73,7 +74,7 @@ class UserUpdate(BaseModel):
         db = SessionLocal()
         try:
             if db.query(UserModel).filter(UserModel.username == v).first():
-                raise ValueError('Username already registered')
+                raise DuplicateEntryException(field="username", value=v)
         finally:
             db.close()
         return v

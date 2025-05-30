@@ -2,6 +2,7 @@ from fastapi import Request, status
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from src.core.response import error_response
+from src.core.exceptions import AppException
 
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     """
@@ -44,4 +45,14 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content=response
+    )
+
+async def app_exception_handler(request: Request, exc: AppException):
+    """
+    Custom handler for AppException.
+    Returns error response in standardized format.
+    """
+    return JSONResponse(
+        status_code=exc.status_code,
+        content=exc.detail
     ) 
