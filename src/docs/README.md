@@ -333,6 +333,100 @@ make clean
    python -m src.db.init_db
    ```
 
+3. **Create new migration**
+   ```bash
+   # Inside the application container
+   make exec
+   alembic revision --autogenerate -m "description of changes"
+   ```
+
+4. **Rollback migration**
+   ```bash
+   # Rollback one step
+   make exec
+   alembic downgrade -1
+
+   # Rollback to specific version
+   make exec
+   alembic downgrade <revision_id>
+
+   # Rollback all migrations
+   make exec
+   alembic downgrade base
+   ```
+
+5. **View migration history**
+   ```bash
+   # List all migrations
+   make exec
+   alembic history
+
+   # Show current migration version
+   make exec
+   alembic current
+   ```
+
+6. **Database backup and restore**
+   ```bash
+   # Backup database
+   docker exec -t base-fastapi-db-1 mysqldump -u root -proot base > backup.sql
+
+   # Restore database
+   cat backup.sql | docker exec -i base-fastapi-db-1 mysql -u root -proot base
+   ```
+
+7. **Reset database**
+   ```bash
+   # Drop and recreate database
+   make exec
+   python -m src.db.reset_db
+
+   # Reinitialize database with migrations and seed data
+   make exec
+   python -m src.db.init_db
+   ```
+
+8. **Test database management**
+   ```bash
+   # Create test database
+   make exec
+   python -m src.db.init_test_db
+
+   # Reset test database
+   make exec
+   python -m src.db.reset_test_db
+   ```
+
+9. **Database connection**
+   ```bash
+   # Connect to MySQL container
+   docker exec -it base-fastapi-db-1 mysql -u root -proot
+
+   # List databases
+   SHOW DATABASES;
+
+   # Use database
+   USE base;
+
+   # Show tables
+   SHOW TABLES;
+
+   # Describe table
+   DESCRIBE table_name;
+   ```
+
+10. **Database monitoring**
+    ```bash
+    # View database logs
+    docker logs base-fastapi-db-1
+
+    # Monitor database processes
+    docker exec -it base-fastapi-db-1 mysqladmin -u root -proot processlist
+
+    # Check database status
+    docker exec -it base-fastapi-db-1 mysqladmin -u root -proot status
+    ```
+
 ### Accessing Services
 
 - API Documentation: `http://localhost:8000/docs`
