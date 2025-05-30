@@ -113,15 +113,19 @@ def verify_refresh_token(
     Verify refresh token and return the token object
     """
     try:
+        # Verify JWT token
         payload = verify_token(token)
-        if payload.get("type") != "refresh":
-            raise HTTPException(status_code=401, detail="Invalid token type")
         
+        # Validate token type
+        if payload.get("type") != "refresh":
+            raise UnauthorizedException(message="Invalid token type")
+        
+        # Get user ID from token
         user_id = payload.get("sub")
         if user_id is None:
-            raise HTTPException(status_code=401, detail="Invalid token")
+            raise UnauthorizedException(message="Invalid token payload")
         
-        # Check if token exists and is not revoked
+        # Check token in database
         db_token = db.query(RefreshToken).filter(
             RefreshToken.token == token,
             RefreshToken.user_id == user_id,
@@ -130,11 +134,14 @@ def verify_refresh_token(
         ).first()
         
         if not db_token:
-            raise HTTPException(status_code=401, detail="Invalid refresh token")
+            raise UnauthorizedException(message="Invalid or expired refresh token")
         
         return db_token
+        
     except JWTError:
-        raise HTTPException(status_code=401, detail="Invalid token")
+        raise UnauthorizedException(message="Invalid token signature")
+    except Exception as e:
+        raise UnauthorizedException(message=f"Token verification failed: {str(e)}")
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return bcrypt.checkpw(
