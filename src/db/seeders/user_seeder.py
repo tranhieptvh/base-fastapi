@@ -14,9 +14,6 @@ class UserSeeder(BaseSeeder):
         if not admin_role or not user_role:
             raise Exception("Roles not found. Please run RoleSeeder first.")
         
-        # Truncate users table
-        self.truncate(User)
-        
         # Create admin user
         admin = self.create(
             User,

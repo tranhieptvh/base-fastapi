@@ -6,9 +6,6 @@ class RoleSeeder(BaseSeeder):
     def run(self):
         print("Seeding roles...")
         
-        # Truncate roles table
-        self.truncate(Role)
-        
         # Create roles
         admin_role = self.create(
             Role,

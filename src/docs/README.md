@@ -353,23 +353,33 @@ The project uses pytest for testing with a dedicated test database. The test env
 
 ### Setup Testing
 
-1. **Environment Setup**
-   - Review test environment configuration in `.env.test`
-   - Ensure test database credentials are correct
+1. **Test Environment Configuration**
+   - Test environment variables are loaded from `.env.test`
+   - Test database settings are configured in `conftest.py`
+   - Test database is automatically managed by fixtures
 
-2. **Database Setup**
-   ```bash
-   # Access application container
-   make exec
+2. **Test Database Lifecycle**
+   ```python
+   # 1. Session Setup (before all tests)
+   @pytest.fixture(scope="session")
+   def engine():
+       # Create test database
+       # Create all tables
+       # Return engine for test session
 
-   # Create and migrate test database
-   DATABASE_URL="mysql+pymysql://root:root@db/test_fastapi_db" alembic upgrade head
+   # 2. Test Setup (before each test)
+   @pytest.fixture(scope="function")
+   def db_session(engine):
+       # Create new session
+       # Start transaction
+       # Yield session for test
+       # Rollback transaction after test
 
-   # Initialize test database with seed data
-   python -m src.db.init_test_db
-
-   # When database updated with new migrations -> update DB Structure
-   DATABASE_URL="mysql+pymysql://root:root@db/test_fastapi_db" alembic upgrade head
+   # 3. Test Cleanup (after all tests)
+   @pytest.fixture(scope="session", autouse=True)
+   def cleanup_test_db(engine):
+       # Drop test database
+       # Clean up resources
    ```
 
 3. **Test Database Configuration**
@@ -379,10 +389,14 @@ The project uses pytest for testing with a dedicated test database. The test env
    - User: `root`
    - Password: `root`
 
-4. **Verify Setup**
-   - Check database connection
-   - Verify migrations are applied
-   - Confirm test data is seeded
+4. **Available Test Fixtures**
+   - `engine`: Database engine for test session
+   - `db_session`: Database session with transaction rollback
+   - `test_role`: Test role creation
+   - `test_user`: Test user creation
+   - `test_user_token`: JWT token for test user
+   - `auth_headers`: Authentication headers
+   - `client`: FastAPI TestClient with database session
 
 ### Running Tests
 

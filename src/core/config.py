@@ -27,6 +27,8 @@ class Settings(BaseSettings):
     MYSQL_DATABASE: str
     MYSQL_USER: str
     MYSQL_PASSWORD: str
+    MYSQL_HOST: str
+    MYSQL_PORT: int
 
     # Email settings
     MAIL_USERNAME: str
