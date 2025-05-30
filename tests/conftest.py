@@ -110,21 +110,47 @@ def test_role(engine):
     finally:
         session.close()
 
-@pytest.fixture(scope="function")
-def test_user(db_session, test_role):
+@pytest.fixture(scope="session")
+def test_user(engine, test_role):
     """Create test user"""
-    user = User(
-        email="test@example.com",
-        username="testuser",
-        full_name="Test User",
-        password=get_password_hash("password"),
-        role_id=test_role.id,
-        is_active=True
-    )
-    db_session.add(user)
-    db_session.commit()
-    db_session.refresh(user)
-    return user
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    try:
+        user = User(
+            email="test@example.com",
+            username="testuser",
+            full_name="Test User",
+            password=get_password_hash("password"),
+            role_id=test_role.id,
+            is_active=True
+        )
+        session.add(user)
+        session.commit()
+        session.refresh(user)
+        return user
+    finally:
+        session.close()
+
+@pytest.fixture(scope="session")
+def test_inactive_user(engine, test_role):
+    """Create inactive test user"""
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    try:
+        user = User(
+            email="inactive@example.com",
+            username="inactiveuser",
+            full_name="Inactive User",
+            password=get_password_hash("password"),
+            role_id=test_role.id,
+            is_active=False
+        )
+        session.add(user)
+        session.commit()
+        session.refresh(user)
+        return user
+    finally:
+        session.close()
 
 @pytest.fixture(scope="function")
 def test_user_token(test_user):
