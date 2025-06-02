@@ -3,13 +3,20 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from src.core.config import settings
 from src.api import api_router
-from src.core.middleware import validation_exception_handler, app_exception_handler
+from src.core.middleware import (
+    validation_exception_handler,
+    app_exception_handler,
+    log_request_middleware
+)
 from src.core.exceptions import AppException
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url=f"{settings.API_STR}/openapi.json"
 )
+
+# Add logging middleware
+app.middleware("http")(log_request_middleware)
 
 # Set all CORS enabled origins
 if settings.BACKEND_CORS_ORIGINS:

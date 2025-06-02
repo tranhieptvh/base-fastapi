@@ -3,6 +3,39 @@ from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from src.core.response import error_response
 from src.core.exceptions import AppException
+from src.core.logging import logger
+import time
+
+async def log_request_middleware(request: Request, call_next):
+    """
+    Middleware to log all incoming requests
+    """
+    start_time = time.time()
+    
+    # Log request
+    logger.info(f"Request: {request.method} {request.url.path}")
+    
+    try:
+        response = await call_next(request)
+        
+        # Calculate processing time
+        process_time = time.time() - start_time
+        
+        # Log response
+        logger.info(
+            f"Response: {request.method} {request.url.path} "
+            f"Status: {response.status_code} "
+            f"Time: {process_time:.2f}s"
+        )
+        
+        return response
+    except Exception as e:
+        # Log error
+        logger.error(
+            f"Error: {request.method} {request.url.path} "
+            f"Error: {str(e)}"
+        )
+        raise
 
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     """
