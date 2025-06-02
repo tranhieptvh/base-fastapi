@@ -67,11 +67,11 @@ def test_register_duplicate_email(client, db_session: Session, test_user):
     # Check error response format
     assert data["status"] == "error"
     assert data["message"] == "email already exists"
-    assert "errors" in data
-    assert "type" in data["errors"]
-    assert data["errors"]["type"] == "duplicate_entry"
-    assert data["errors"]["field"] == "email"
-    assert data["errors"]["value"] == test_user.email
+    assert "fields" in data["errors"]
+    
+    email_error = data["errors"]["fields"][0]
+    assert email_error["field"] == "email"
+    assert email_error["type"] == "duplicate_entry"
     
     # Verify no new user was created
     db_users = db_session.query(User).filter(User.email == input_data["email"]).all()
@@ -97,11 +97,11 @@ def test_register_user_duplicate_username(client, db_session: Session, test_user
     # Check error response format
     assert data["status"] == "error"
     assert data["message"] == "username already exists"
-    assert "errors" in data
-    assert "type" in data["errors"]
-    assert data["errors"]["type"] == "duplicate_entry"
-    assert data["errors"]["field"] == "username"
-    assert data["errors"]["value"] == test_user.username
+    assert "fields" in data["errors"]
+    
+    username_error = data["errors"]["fields"][0]
+    assert username_error["field"] == "username"
+    assert username_error["type"] == "duplicate_entry"
     
     # Verify no new user was created
     db_users = db_session.query(User).filter(User.username == input_data["username"]).all()
