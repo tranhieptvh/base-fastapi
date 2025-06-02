@@ -88,4 +88,42 @@ async def app_exception_handler(request: Request, exc: AppException):
     return JSONResponse(
         status_code=exc.status_code,
         content=exc.detail
-    ) 
+    )
+
+def setup_cors_middleware(app):
+    """
+    Setup CORS middleware for the FastAPI application
+    
+    Args:
+        app: FastAPI application instance
+    """
+    from fastapi.middleware.cors import CORSMiddleware
+    from src.core.config import settings
+    
+    if settings.BACKEND_CORS_ORIGINS:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+            expose_headers=["*"],
+            max_age=3600,  # Cache preflight requests for 1 hour
+        )
+
+def setup_middleware(app):
+    """
+    Setup all middleware for the FastAPI application
+    
+    Args:
+        app: FastAPI application instance
+    """
+    # Add request logging middleware
+    app.middleware("http")(log_request_middleware)
+    
+    # Add exception handlers
+    app.add_exception_handler(RequestValidationError, validation_exception_handler)
+    app.add_exception_handler(AppException, app_exception_handler)
+    
+    # Setup CORS
+    setup_cors_middleware(app) 

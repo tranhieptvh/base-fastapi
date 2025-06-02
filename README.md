@@ -11,6 +11,7 @@ A base FastAPI project with SQLAlchemy, Alembic, and JWT authentication.
 - Email integration with FastAPI-mail
 - Task queue with Celery and Redis
 - Environment configuration with python-dotenv
+- Comprehensive logging system with daily rotation
 
 ## Development
 
@@ -26,6 +27,8 @@ This project uses Poetry for dependency management and includes development tool
 ```
 .
 ├── alembic/              # Database migrations
+├── logs/                 # Application logs
+│   └── YYYY-MM-DD.log   # Daily log files
 ├── src/                  # Application source code
 │   ├── api/             # API endpoints
 │   ├── core/            # Core functionality

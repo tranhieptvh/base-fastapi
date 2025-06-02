@@ -13,6 +13,7 @@ This is a modern FastAPI project template that provides a solid foundation for b
 - **Testing**: pytest with coverage reporting
 - **Documentation**: Auto-generated OpenAPI documentation
 - **Containerization**: Docker and Docker Compose support
+- **Logging**: Comprehensive logging system with daily rotation
 
 ## Detail Project Structure
 
@@ -30,6 +31,7 @@ This is a modern FastAPI project template that provides a solid foundation for b
 │   │   ├── middleware.py  # Custom middleware
 │   │   ├── exceptions.py  # Custom exceptions
 │   │   ├── response.py    # Response models
+│   │   ├── logging.py     # Logging configuration
 │   │   ├── enums.py      # Enum definitions
 │   │   └── __init__.py
 │   ├── db/               # Database layer
@@ -59,9 +61,29 @@ This is a modern FastAPI project template that provides a solid foundation for b
 │   ├── templates/        # Email templates
 │   │   └── email/        # Email HTML templates
 │   ├── docs/             # Project documentation
-│   │   └── README.md     # This documentation file
+│   │   ├── README.md     # Main documentation file
+│   │   └── architecture/ # Architecture documentation
+│   │       ├── core/           # Core system documentation
+│   │       │   ├── core_concept.md    # Core concepts
+│   │       │   ├── middleware.md      # Middleware system
+│   │       │   ├── request_response.md # Request/Response handling
+│   │       │   └── logging.md         # Logging system
+│   │       ├── data/           # Data and storage documentation
+│   │       │   └── batch.md           # Batch processing
+│   │       ├── security/       # Security documentation
+│   │       │   └── auth.md            # Authentication system
+│   │       ├── communication/  # Communication documentation
+│   │       │   └── email_system.md    # Email system
+│   │       └── devops/         # Development and operations
+│   │           ├── debug.md           # Debugging guide
+│   │           ├── testing.md         # Testing strategy
+│   │           └── ci_cd.md           # CI/CD pipeline
 │   ├── main.py          # Application entry point
 │   └── __init__.py
+├── logs/                 # Application logs
+│   ├── YYYY-MM-DD.log   # Current day's log file
+│   ├── YYYY-MM-DD.log.1 # Previous day's log file
+│   └── YYYY-MM-DD.log.2 # Two days ago log file
 ├── tests/                # Test files
 │   ├── api/             # API tests
 │   │   └── test_auth.py # Authentication tests
@@ -80,151 +102,14 @@ This is a modern FastAPI project template that provides a solid foundation for b
 └── .dockerignore     # Docker ignore file
 ```
 
-## API Endpoints
-
-The API is organized into the following main routes:
-
-1. **Health Check**
-   - Endpoint: `/ping`
-   - Purpose: Verify API availability
-   - Tags: `ping`
-
-2. **Authentication**
-   - Base Path: `/auth`
-   - Features: Login, registration, password reset
-   - Tags: `auth`
-
-3. **User Management**
-   - Base Path: `/users`
-   - Features: User CRUD operations
-   - Tags: `users`
 
 ## Middleware
 
-The project includes several middleware components to enhance security and functionality:
-
-1. **CORS Middleware**
-   - Handles Cross-Origin Resource Sharing
-   - Configurable allowed origins, methods, and headers
-   - Secure by default with strict settings
-   - Location: `src/main.py`
-   - Usage: Applied globally to all routes
-
-2. **Authentication Middleware**
-   - JWT token validation
-   - User session management
-   - Role-based access control
-   - Location: `src/dependencies/auth.py`
-   - Usage: Applied via dependency injection `@Depends(get_current_user)`
-
-3. **Error Handling Middleware**
-   - Global exception handling
-   - Standardized error responses
-   - Detailed error logging
-   - Location: `src/core/exceptions.py`
-   - Usage: Registered in `src/main.py`
-
-4. **Validation Exception Handler**
-   - Custom handler for Pydantic validation errors
-   - Location: `src/core/middleware.py`
-   - Usage: Registered in `src/main.py` as exception handler
-   - Transforms validation errors into standardized format:
-     ```json
-     {
-         "status": "error",
-         "message": "Validation error",
-         "errors": {
-             "fields": [
-                 {
-                     "field": "email",
-                     "message": "invalid email format",
-                     "type": "value_error.email"
-                 }
-             ]
-         }
-     }
-     ```
-   - Features:
-     - Automatic field name extraction from error location
-     - Consistent error response structure
-     - Detailed validation error messages
-     - HTTP 422 status code for validation errors
-     - Support for multiple field errors in a single response
+For detailed information about middleware components, their configuration, and best practices, please refer to the [Middleware Documentation](architecture/core/middleware.md).
 
 ## Request & Response Handling
 
-### Request Validation
-- Pydantic models for request validation
-- Automatic type conversion
-- Custom validators for complex rules
-- Detailed error messages for invalid inputs
-
-### Response Models
-
-1. **BaseResponse**
-   ```python
-   class BaseResponse(BaseModel):
-       status: str
-       message: str
-   ```
-
-2. **SuccessResponse**
-   ```python
-   class SuccessResponse(BaseResponse, Generic[T]):
-       status: str = "success"
-       message: str = "Success"
-       data: Optional[T] = None
-   ```
-
-3. **ErrorResponse**
-   ```python
-   class ErrorResponse(BaseResponse):
-       status: str = "error"
-       message: str = "Error"
-       errors: Dict[str, Any] = {}
-   ```
-
-### Response Format
-
-1. **Success Response**
-   ```json
-   {
-       "status": "success",
-       "message": "Success",
-       "data": {
-           // Response data here
-       }
-   }
-   ```
-
-2. **Error Response**
-   ```json
-   {
-       "status": "error",
-       "message": "Error message",
-       "errors": {
-           // Additional error details
-       }
-   }
-   ```
-
-### Helper Functions
-
-1. **success_response**
-   ```python
-   def success_response(data: Any = None, message: str = "Success") -> Dict[str, Any]
-   ```
-   - Creates a standardized success response
-   - Optional data and custom message
-   - Returns dictionary format
-
-2. **error_response**
-   ```python
-   def error_response(message: str = "Error", errors: Optional[Dict[str, Any]] = None) -> Dict[str, Any]
-   ```
-   - Creates a standardized error response
-   - Optional error details and custom message
-   - Returns dictionary format
+For detailed information about request validation, response formatting, and best practices, please refer to the [Request & Response Documentation](architecture/core/request_response.md).
 
 ## Development Setup
 
@@ -436,227 +321,7 @@ make clean
 
 ## Testing
 
-### Test Environment
-
-The project uses pytest for testing with a dedicated test database. The test environment is configured in `.env.test` and uses the following components:
-
-- Test database (MySQL)
-- Test client (FastAPI TestClient)
-- Fixtures for common test scenarios
-- Automatic database cleanup after tests
-
-### Setup Testing
-
-1. **Test Environment Configuration**
-   - Test environment variables are loaded from `.env.test`
-   - Test database settings are configured in `conftest.py`
-   - Test database is automatically managed by fixtures
-
-2. **Test Database Lifecycle**
-   ```python
-   # 1. Session Setup (before all tests)
-   @pytest.fixture(scope="session")
-   def engine():
-       # Create test database
-       # Create all tables
-       # Return engine for test session
-
-   # 2. Test Setup (before each test)
-   @pytest.fixture(scope="function")
-   def db_session(engine):
-       # Create new session
-       # Start transaction
-       # Yield session for test
-       # Rollback transaction after test
-
-   # 3. Test Cleanup (after all tests)
-   @pytest.fixture(scope="session", autouse=True)
-   def cleanup_test_db(engine):
-       # Drop test database
-       # Clean up resources
-   ```
-
-3. **Test Database Configuration**
-   - Database Name: `test_fastapi_db`
-   - Host: `db`
-   - Port: `3306`
-   - User: `root`
-   - Password: `root`
-
-4. **Available Test Fixtures**
-   - `engine`: Database engine for test session
-   - `db_session`: Database session with transaction rollback
-   - `test_role`: Test role creation
-   - `test_user`: Test user creation
-   - `test_user_token`: JWT token for test user
-   - `auth_headers`: Authentication headers
-   - `client`: FastAPI TestClient with database session
-
-### Running Tests
-
-```bash
-# Inside the application container
-make exec
-
-# Run all tests
-pytest
-
-# Run with coverage report
-pytest --cov=src tests/
-
-# Run specific test file
-pytest tests/api/test_auth.py
-
-# Run specific test function
-pytest tests/api/test_auth.py::test_register_success
-
-# Run tests with verbose output
-pytest -v
-
-# Run tests and show print statements
-pytest -s
-```
-
-### Test Structure
-
-```
-.
-├── .env.test           # Test environment variables
-├── src/
-│   ├── db/
-│   │   └── init_test_db.py  # Test database initialization
-│   └── ...
-└── tests/              # Test files
-    ├── api/           # API endpoint tests
-    │   └── test_auth.py   # Authentication tests
-    └── conftest.py    # Test configuration and fixtures
-```
-
-### Available Fixtures
-
-1. **Database Fixtures**
-   - `engine`: Test database engine
-   - `db_session`: Database session with transaction rollback
-   - `cleanup_test_db`: Automatic database cleanup
-
-2. **Authentication Fixtures**
-   - `test_role`: Test role creation
-   - `test_user`: Test user creation
-   - `test_user_token`: JWT token for test user
-   - `auth_headers`: Authentication headers
-   - `expired_token`: Expired JWT token
-
-3. **Client Fixtures**
-   - `client`: FastAPI TestClient with database session
-
-### Writing Tests
-
-1. **Test Structure**
-   ```python
-   def test_feature_name(client, db_session):
-       # Arrange
-       # Setup test data
-       
-       # Act
-       # Perform the action being tested
-       
-       # Assert
-       # Verify the results
-   ```
-
-2. **Example Test**
-   ```python
-   def test_register_success(client, db_session, test_role):
-       # Arrange
-       input_data = {
-           "email": "newuser@example.com",
-           "username": "newuser",
-           "full_name": "New User",
-           "password": "Test123!@#",
-           "role_id": test_role.id
-       }
-       
-       # Act
-       response = client.post("/auth/register", json=input_data)
-       
-       # Assert
-       assert response.status_code == 200
-       data = response.json()
-       assert data["data"]["email"] == input_data["email"]
-   ```
-
-### Test Coverage
-
-The project uses pytest-cov for test coverage reporting. To generate a coverage report:
-
-```bash
-# Generate coverage report
-pytest --cov=src tests/ --cov-report=term-missing
-
-# Generate HTML coverage report
-pytest --cov=src tests/ --cov-report=html
-```
-
-### Best Practices
-
-1. **Test Isolation**
-   - Each test should be independent
-   - Use fixtures for common setup
-   - Clean up after each test
-
-2. **Database Testing**
-   - Use transactions for test isolation
-   - Roll back changes after each test
-   - Use test-specific database
-
-3. **Authentication Testing**
-   - Test both authenticated and unauthenticated scenarios
-   - Verify token validation
-   - Test error cases
-
-4. **API Testing**
-   - Test all HTTP methods
-   - Verify response status codes
-   - Check response data structure
-   - Test error handling
-
-## Code Quality
-
-The project uses several tools to maintain code quality. All commands should be run inside the application container:
-
-```bash
-# Access the application container
-make exec
-
-# Format code with Black
-black .
-
-# Sort imports with isort
-isort .
-
-# Lint code with flake8
-flake8
-
-# Run all code quality checks
-black . && isort . && flake8
-```
-
-### Code Quality Tools
-
-1. **Black**
-   - Python code formatter
-   - Enforces consistent code style
-   - Config: `pyproject.toml`
-
-2. **isort**
-   - Import sorter
-   - Organizes imports into sections
-   - Config: `pyproject.toml`
-
-3. **flake8**
-   - Code linter
-   - Checks for style and potential errors
-   - Config: `.flake8`
+For detailed information about testing strategy, test organization, and best practices, please refer to the [Testing Documentation](architecture/devops/testing.md).
 
 ## API Documentation
 

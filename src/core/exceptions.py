@@ -38,9 +38,13 @@ class DuplicateEntryException(ValidationException):
         super().__init__(
             message=f"{field} already exists",
             errors={
-                "type": "duplicate_entry",
-                "field": field,
-                "value": value
+                "fields": [
+                    {
+                        "type": "duplicate_entry",
+                        "field": field,
+                        "value": value
+                    }
+                ]
             }
         )
 
