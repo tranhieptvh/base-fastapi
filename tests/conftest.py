@@ -8,7 +8,9 @@ sys.path.insert(0, project_root)
 
 # Load test environment variables BEFORE importing any other modules
 from dotenv import load_dotenv
-load_dotenv('.env.test', override=True)  # Force override existing env vars
+# Only load .env.test if not in a CI environment (like GitHub Actions)
+if not os.getenv('CI'):
+    load_dotenv('.env.test', override=True)  # Force override existing env vars
 
 import pytest
 from sqlalchemy import create_engine, text
