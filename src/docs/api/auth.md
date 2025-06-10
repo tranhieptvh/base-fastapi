@@ -1,36 +1,26 @@
 # Authentication API
 
 ## Overview
-The authentication system provides secure user management with JWT-based authentication, password hashing, and role-based access control.
+The authentication system provides secure user management using JWT-based authentication. It handles user registration, login via email and password, token refreshing, and logout.
 
 ## Endpoints
 
 ### User Registration
-- **Endpoint**: `POST /api/v1/auth/register`
-- **Description**: Creates new user account
-- **Features**:
-  - Validates unique email and username
-  - Hashes password using bcrypt
-  - Returns user data without password
+- **Endpoint**: `POST /api/auth/register`
+- **Description**: Creates a new user account.
 - **Request Body**:
   ```json
   {
       "email": "user@example.com",
-      "username": "username",
       "password": "password123",
       "full_name": "Full Name"
   }
   ```
-- **Response**: User data without password
+- **Response**: User data (without the password) upon successful registration.
 
 ### User Login
-- **Endpoint**: `POST /api/v1/auth/login`
-- **Description**: Authenticates user and returns JWT token
-- **Features**:
-  - Authenticates with email/password
-  - Returns JWT access token
-  - Validates user is active
-  - Token expires after configured time
+- **Endpoint**: `POST /api/auth/login`
+- **Description**: Authenticates a user and returns access and refresh tokens.
 - **Request Body**:
   ```json
   {
@@ -38,90 +28,58 @@ The authentication system provides secure user management with JWT-based authent
       "password": "password123"
   }
   ```
-- **Response**: JWT access token
+- **Response**:
+  ```json
+  {
+      "access_token": "string",
+      "refresh_token": "string",
+      "token_type": "bearer"
+  }
+  ```
 
-### Password Management
-
-#### Update Password
-- **Endpoint**: `POST /api/v1/auth/password/update`
-- **Description**: Updates user's password
-- **Features**:
-  - Requires current password verification
-  - Updates to new password
-  - Requires authentication
+### Refresh Access Token
+- **Endpoint**: `POST /api/auth/refresh-token`
+- **Description**: Issues a new access token using a valid refresh token.
 - **Request Body**:
   ```json
   {
-      "current_password": "oldpassword",
-      "new_password": "newpassword123"
+      "refresh_token": "your_refresh_token"
   }
   ```
-- **Response**: Success message
-
-#### Password Reset Flow
-
-##### Request Reset
-- **Endpoint**: `POST /api/v1/auth/password-reset`
-- **Description**: Initiates password reset process
-- **Features**:
-  - Sends reset token via email
-  - Token valid for 24 hours
-- **Request Body**:
-  ```json
-  {
-      "email": "user@example.com"
-  }
-  ```
-- **Response**: Success message
-
-##### Confirm Reset
-- **Endpoint**: `POST /api/v1/auth/password-reset/confirm`
-- **Description**: Completes password reset process
-- **Features**:
-  - Validates reset token
-  - Updates password
-  - No authentication required
-- **Request Body**:
-  ```json
-  {
-      "token": "reset_token",
-      "new_password": "newpassword123"
-  }
-  ```
-- **Response**: Success message
+- **Response**: Returns a new `access_token` and the original `refresh_token`. The new access token is also set as an `httponly` cookie.
 
 ### Logout
-- **Endpoint**: `POST /api/v1/auth/logout`
-- **Description**: Logs out user
-- **Features**:
-  - TODO: Implement token blacklist/revocation
-- **Response**: Success message
+- **Endpoint**: `POST /api/auth/logout`
+- **Description**: Logs out the user by revoking their refresh token. The request requires a valid refresh token to identify and revoke the correct token.
+- **Request Body**:
+  ```json
+  {
+    "refresh_token": "your_refresh_token"
+  }
+  ```
+- **Response**: A success message upon successful logout.
 
 ## Security Features
 
 ### Password Security
-- Bcrypt hashing
-- Minimum length requirements
-- Current password verification for updates
+- Passwords are securely hashed using `bcrypt` before being stored.
+- The hashing is handled by `passlib`.
 
 ### Token Security
-- JWT-based authentication
-- Configurable expiration
-- TODO: Token blacklist for logout
-
-### Input Validation
-- Email format validation
-- Username length requirements
-- Password strength requirements
+- **JWT**: The system uses JSON Web Tokens (JWT) for creating secure access tokens.
+- **Access Token**: Short-lived token used to authenticate API requests.
+- **Refresh Token**: Long-lived token stored in the database, used to obtain a new access token without requiring the user to log in again. It is revoked upon logout.
+- **Token Handling**: The `python-jose` library is used for JWT operations.
 
 ## Dependencies
-- `python-jose`: JWT token handling
-- `passlib`: Password hashing
-- `bcrypt`: Password hashing algorithm
-- `pydantic`: Data validation
+- `fastapi`: Web framework.
+- `sqlalchemy`: Database ORM.
+- `python-jose`: For JWT creation and validation.
+- `passlib[bcrypt]`: For password hashing.
+- `pydantic`: For data validation in request and response models.
 
 ## Configuration
-Key settings in `app/core/config.py`:
-- `SECRET_KEY`: JWT signing key
-- `ACCESS_TOKEN_EXPIRE_MINUTES`: Token expiration time
-- `ALGORITHM`: JWT signing algorithm (HS256) 
+Key settings are managed in `src/core/config.py` via environment variables:
+- `SECRET_KEY`: The secret key for signing JWTs.
+- `ACCESS_TOKEN_EXPIRE_MINUTES`: The lifetime of an access token.
+- `ALGORITHM`: The algorithm used for JWT signing (e.g., HS256). 
