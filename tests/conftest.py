@@ -33,18 +33,21 @@ TEST_DATABASE_URL = settings.DATABASE_URL
 @pytest.fixture(scope="session")
 def engine():
     # Use the unified DATABASE_URL from settings
-    engine = create_engine(TEST_DATABASE_URL, poolclass=StaticPool)
+    test_engine = create_engine(TEST_DATABASE_URL, poolclass=StaticPool)
 
-    # Create test database if not exists
-    db_name = engine.url.database
-    base_url = str(engine.url.copy_with(database=None))
+    # Create test database if not exists - MORE ROBUST WAY
+    db_name = test_engine.url.database
+    # Manually construct the base URL without the database name
+    base_url = (
+        f"{test_engine.url.drivername}://{test_engine.url.username}:{test_engine.url.password}"
+        f"@{test_engine.url.host}:{test_engine.url.port}"
+    )
 
     with create_engine(base_url).connect() as conn:
         conn.execute(text(f"CREATE DATABASE IF NOT EXISTS {db_name}"))
         conn.commit()
     
     # Connect to the specific test database to create tables
-    test_engine = create_engine(TEST_DATABASE_URL)
     Base.metadata.create_all(bind=test_engine)
     return test_engine
 
