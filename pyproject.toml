@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Base FastAPI project with SQLAlchemy, Alembic, and JWT authentication"
 authors = ["HiepTV <tranhieptvh@gmail.com>"]
 readme = "README.md"
+packages = [{include = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.12"
