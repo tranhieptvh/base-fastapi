@@ -4,14 +4,17 @@ A base FastAPI project with SQLAlchemy, Alembic, and JWT authentication.
 
 ## Features
 
-- FastAPI framework
-- SQLAlchemy ORM
-- Alembic migrations
-- JWT authentication
-- Email integration with FastAPI-mail
-- Task queue with Celery and Redis
-- Environment configuration with python-dotenv
-- Comprehensive logging system with daily rotation
+- **Framework**: FastAPI for high-performance APIs.
+- **Database**: SQLAlchemy ORM with Alembic for migrations.
+- **Authentication**: JWT token authentication.
+- **Async Tasks**: Celery with Redis for background jobs.
+- **Containerization**: Docker and Docker Compose for easy setup and deployment.
+- **Dependency Management**: Poetry for managing project dependencies.
+- **Configuration**: Centralized settings management using python-dotenv.
+- **Code Quality**: Pre-configured with Black, isort, flake8, and mypy.
+- **Testing**: Pytest for unit and integration testing.
+- **Email**: Email integration with FastAPI-mail.
+- **Logging**: Comprehensive logging system with daily rotation.
 
 ## Development
 
@@ -26,28 +29,32 @@ This project uses Poetry for dependency management and includes development tool
 
 ```
 .
-├── alembic/              # Database migrations
+├── .github/              # GitHub Actions workflows
 ├── logs/                 # Application logs
-│   └── YYYY-MM-DD.log   # Daily log files
+│   └── YYYY-MM-DD.log    # Daily log files
+├── migrations/           # Database migrations (Alembic)
 ├── src/                  # Application source code
-│   ├── api/             # API endpoints
-│   ├── core/            # Core functionality
-│   ├── db/              # Database models and session
-│   ├── dependencies/    # Application dependencies
-│   ├── schemas/         # Pydantic models
-│   ├── services/        # Business logic
-│   ├── tasks/           # Celery tasks
-│   ├── templates/       # Email templates
-│   └── docs/           # Project documentation
-├── tests/               # Test files
-│   ├── api/            # API tests
-│   └── conftest.py     # Test configuration
-├── .env                 # Environment variables
-├── .env.example         # Example environment variables
-├── alembic.ini          # Alembic configuration
-├── pyproject.toml       # Poetry configuration
-├── Dockerfile          # Docker configuration
-└── docker-compose.yml  # Docker Compose configuration
+│   ├── api/              # API endpoints
+│   ├── core/             # Core functionality
+│   ├── db/               # Database models and session
+│   ├── dependencies/     # Application dependencies
+│   ├── schemas/          # Pydantic models
+│   ├── services/         # Business logic
+│   ├── tasks/            # Celery tasks
+│   ├── templates/        # Email templates
+│   └── docs/             # Project documentation
+├── tests/                # Test files
+│   ├── api/              # API tests
+│   └── conftest.py       # Test configuration
+├── .dockerignore         # Docker ignore file
+├── .env.example          # Example environment variables
+├── .gitignore            # Git ignore file
+├── alembic.ini           # Alembic configuration
+├── docker-compose.yml    # Docker Compose configuration
+├── Dockerfile            # Docker configuration
+├── Makefile              # Makefile for common commands
+├── poetry.lock           # Poetry lock file
+└── pyproject.toml        # Poetry configuration and dependencies
 ```
 
 ## Setup with Docker

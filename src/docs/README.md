@@ -7,18 +7,20 @@ This is a modern FastAPI project template that provides a solid foundation for b
 ## Key Features
 
 - **Modern Stack**: FastAPI, SQLAlchemy, Pydantic, Poetry
-- **Authentication**: JWT-based authentication with password reset
+- **Authentication**: JWT-based authentication
 - **Database**: SQLAlchemy ORM with Alembic migrations
-- **Code Quality**: Black, isort, Flake8
+- **Code Quality**: Black, isort, Flake8, mypy
 - **Testing**: pytest with coverage reporting
 - **Documentation**: Auto-generated OpenAPI documentation
 - **Containerization**: Docker and Docker Compose support
 - **Logging**: Comprehensive logging system with daily rotation
+- **Async Tasks**: Celery with Redis for background jobs.
 
 ## Detail Project Structure
 
 ```
 .
+├── .github/              # GitHub Actions workflows
 ├── src/                    # Application source code
 │   ├── api/               # API layer
 │   │   ├── auth.py        # Authentication endpoints
@@ -117,6 +119,7 @@ For detailed information about request validation, response formatting, and best
 - Docker and Docker Compose installed
 - Git for version control
 - Make (optional, for using Makefile commands)
+- Poetry for dependency management
 
 ### Environment Setup
 
@@ -322,6 +325,12 @@ make clean
 ## Testing
 
 For detailed information about testing strategy, test organization, and best practices, please refer to the [Testing Documentation](architecture/devops/testing.md).
+
+## Continuous Integration & Deployment (CI/CD)
+
+This project uses [GitHub Actions](.github/) for Continuous Integration. The CI pipeline ensures code quality by automatically running tests for every pull request targeting the `develop` and `main` branches.
+
+For a detailed explanation of the CI/CD strategy, workflow configuration, and branch protection rules, please refer to the [**CI/CD Documentation**](architecture/devops/ci_cd.md).
 
 ## API Documentation
 
