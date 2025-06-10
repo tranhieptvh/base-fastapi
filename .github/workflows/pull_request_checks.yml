@@ -24,6 +24,18 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=3
+    
+    env:
+      MYSQL_HOST: 127.0.0.1
+      MYSQL_PORT: 3306
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+      MYSQL_DATABASE: test_db
+      MYSQL_ROOT_PASSWORD: root
+      MAIL_USERNAME: "test@example.com"
+      MAIL_PASSWORD: "password"
+      MAIL_FROM: "test@example.com"
+      MAIL_FROM_NAME: "Test Sender"
 
     steps:
       - uses: actions/checkout@v4
@@ -37,36 +49,8 @@ jobs:
         run: |
           curl -sSL https://install.python-poetry.org | python3 -
           
-      # Provide environment variables for the steps below
       - name: Install dependencies
-        env:
-          # These variables will be used by the application inside the CI runner
-          MYSQL_HOST: 127.0.0.1
-          MYSQL_PORT: 3306
-          MYSQL_USER: root
-          MYSQL_PASSWORD: root
-          MYSQL_DATABASE: test_db
-          MYSQL_ROOT_PASSWORD: root
-          
-          # Dummy mail settings to satisfy Pydantic settings
-          MAIL_USERNAME: "test@example.com"
-          MAIL_PASSWORD: "password"
-          MAIL_FROM: "test@example.com"
-          MAIL_FROM_NAME: "Test Sender"
         run: poetry install
         
-      # Enable the test step
       - name: Run all tests
-        env:
-          MYSQL_HOST: 127.0.0.1
-          MYSQL_PORT: 3306
-          MYSQL_USER: root
-          MYSQL_PASSWORD: root
-          MYSQL_DATABASE: test_db
-          MYSQL_ROOT_PASSWORD: root
-
-          MAIL_USERNAME: "test@example.com"
-          MAIL_PASSWORD: "password"
-          MAIL_FROM: "test@example.com"
-          MAIL_FROM_NAME: "Test Sender"
         run: poetry run pytest tests/ 
