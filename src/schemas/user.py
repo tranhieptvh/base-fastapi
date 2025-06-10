@@ -82,6 +82,7 @@ class UserUpdate(BaseModel):
 class UserInDBBase(UserBase):
     id: int
     is_active: bool
+    is_admin: bool
     created_at: datetime
     updated_at: Optional[datetime] = None
 
@@ -90,7 +91,7 @@ class UserInDBBase(UserBase):
 class UserResponse(UserInDBBase):
     pass
 
-class User(UserInDBBase):
+class UserSchema(UserInDBBase):
     pass
 
 class UserInDB(UserInDBBase):

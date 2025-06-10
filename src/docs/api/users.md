@@ -1,143 +1,91 @@
 # Users API
 
-This module provides API endpoints for user management in the system.
+This module provides basic CRUD API endpoints for user management. Access to these endpoints requires authentication, and some operations are restricted to admins.
 
 ## Endpoints
 
 ### 1. Create User
-- **URL**: `/api/v1/users/`
+- **URL**: `/api/users/`
 - **Method**: `POST`
-- **Description**: Create a new user
+- **Description**: Create a new user. This endpoint is only accessible to admins.
 - **Request Body**:
   ```json
   {
-    "email": "user@example.com",
-    "username": "username",
-    "password": "password123"
+    "email": "newuser@example.com",
+    "password": "strongpassword123",
+    "full_name": "New User"
   }
   ```
-- **Validation Rules**:
-  - Email must be a valid email address
-  - Email must be unique
-  - Username must be unique
-  - Password must be at least 6 characters long
-- **Response**: 
+- **Response**: The newly created user object, wrapped in a success response.
   ```json
   {
-    "id": 1,
-    "email": "user@example.com",
-    "username": "username",
-    "is_active": true,
-    "created_at": "2024-03-20T10:00:00",
-    "updated_at": "2024-03-20T10:00:00"
-  }
-  ```
-
-### 2. Get Users
-- **URL**: `/api/v1/users/`
-- **Method**: `GET`
-- **Description**: Get a list of users
-- **Query Parameters**:
-  - `skip`: Number of records to skip (default: 0)
-  - `limit`: Maximum number of records to return (default: 100)
-- **Response**:
-  ```json
-  [
-    {
-      "id": 1,
-      "email": "user@example.com",
-      "username": "username",
+    "data": {
+      "id": 2,
+      "email": "newuser@example.com",
+      "full_name": "New User",
       "is_active": true,
-      "created_at": "2024-03-20T10:00:00",
-      "updated_at": "2024-03-20T10:00:00"
-    }
-  ]
-  ```
-
-### 3. Get User
-- **URL**: `/api/v1/users/{user_id}`
-- **Method**: `GET`
-- **Description**: Get detailed information about a specific user
-- **Path Parameters**:
-  - `user_id`: ID of the user
-- **Response**:
-  ```json
-  {
-    "id": 1,
-    "email": "user@example.com",
-    "username": "username",
-    "is_active": true,
-    "created_at": "2024-03-20T10:00:00",
-    "updated_at": "2024-03-20T10:00:00"
+      "is_admin": true
+    },
+    "message": "User created successfully"
   }
   ```
+
+### 2. Get All Users
+- **URL**: `/api/users/`
+- **Method**: `GET`
+- **Description**: Get a list of all users. This endpoint is only accessible to admins.
+- **Query Parameters**:
+  - `skip`: Number of records to skip (default: 0).
+  - `limit`: Maximum number of records to return (default: 100).
+- **Response**: A list of user objects, wrapped in a success response.
+
+### 3. Get a Specific User
+- **URL**: `/api/users/{user_id}`
+- **Method**: `GET`
+- **Description**: Get detailed information about a specific user. A user can retrieve their own data. An admin can retrieve any user's data.
+- **Path Parameters**:
+  - `user_id`: The ID of the user to retrieve.
+- **Response**: A single user object, wrapped in a success response.
 
 ### 4. Update User
-- **URL**: `/api/v1/users/{user_id}`
+- **URL**: `/api/users/{user_id}`
 - **Method**: `PUT`
-- **Description**: Update user information
+- **Description**: Update a user's information. A user can update their own data. An admin can update any user's data.
 - **Path Parameters**:
-  - `user_id`: ID of the user
-- **Request Body**:
+  - `user_id`: The ID of the user to update.
+- **Request Body** (only include fields to be updated):
   ```json
   {
-    "email": "newemail@example.com",
-    "username": "newusername",
-    "password": "newpassword123",
-    "is_active": true
+    "full_name": "Updated Full Name",
+    "email": "updated@example.com"
   }
   ```
-- **Validation Rules**:
-  - Email must be a valid email address
-  - Email must be unique (if changed)
-  - Username must be unique (if changed)
-  - Password must be at least 6 characters long (if changed)
+- **Response**: The updated user object, wrapped in a success response.
+
+### 5. Delete User
+- **URL**: `/api/users/{user_id}`
+- **Method**: `DELETE`
+- **Description**: Delete a user. This endpoint is only accessible to admins.
+- **Path Parameters**:
+  - `user_id`: The ID of the user to delete.
 - **Response**:
   ```json
   {
-    "id": 1,
-    "email": "newemail@example.com",
-    "username": "newusername",
-    "is_active": true,
-    "created_at": "2024-03-20T10:00:00",
-    "updated_at": "2024-03-20T10:00:00"
+    "data": null,
+    "message": "User deleted successfully"
   }
   ```
-
-### 5. Delete User
-- **URL**: `/api/v1/users/{user_id}`
-- **Method**: `DELETE`
-- **Description**: Delete a user
-- **Path Parameters**:
-  - `user_id`: ID of the user
-- **Response**: `true` if deletion is successful
 
 ## Error Responses
 
-### Validation Error
-```json
-{
-  "status": "error",
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Validation error",
-    "details": [
-      {
-        "field": "email",
-        "message": "Email already registered"
-      }
-    ]
-  }
-}
-```
+### 400 Bad Request
+- **Message**: "Admins cannot delete themselves"
+- **Trigger**: An admin attempts to delete their own account.
 
-### Not Found Error
-```json
-{
-  "status": "error",
-  "error": {
-    "code": "NOT_FOUND",
-    "message": "User not found"
-  }
-}
-``` 
+### 401 Unauthorized
+- **Message**: "You are not authorized to..."
+- **Trigger**: A non-admin user tries to access an admin-only endpoint or another user's data.
+
+### 404 Not Found
+- **Message**: "User not found"
+- **Trigger**: The user with the specified `user_id` does not exist. 

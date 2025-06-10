@@ -69,3 +69,14 @@ class UnauthorizedException(AppException):
             message=message,
             errors={"type": "unauthorized"}
         )
+
+class BadRequestException(AppException):
+    """
+    Exception for bad request errors.
+    """
+    def __init__(self, message: str = "Bad Request"):
+        super().__init__(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            message=message,
+            errors={"type": "bad_request"}
+        )

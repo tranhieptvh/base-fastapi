@@ -1,75 +1,72 @@
-from typing import Any, List
-from fastapi import APIRouter, Depends, status, HTTPException
+from typing import List
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+
 from src.db.session import get_db
-from src.dependencies import get_current_user, get_current_active_user
+from src.dependencies import get_current_active_user
 from src.db.models import User
-from src.schemas.user import User as UserSchema, UserCreate, UserUpdate
+from src.schemas.user import UserSchema, UserCreate, UserUpdate
 from src.services import user as user_service
-from src.core.exceptions import NotFoundException, ValidationException
-from src.core.response import SuccessResponse, ErrorResponse
+from src.core.exceptions import BadRequestException, NotFoundException, UnauthorizedException
+from src.core.response import SuccessResponse
 
 router = APIRouter()
+
 
 @router.post("/", response_model=SuccessResponse[UserSchema], status_code=status.HTTP_201_CREATED)
 async def create_user(
     *,
     db: Session = Depends(get_db),
     user_in: UserCreate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_active_user),
 ):
     """
-    Create new user.
+    Create a new user. Only accessible to admins.
     """
-    user = user_service.get_user_by_email(db, email=user_in.email)
-    if user:
-        raise HTTPException(
-            status_code=400,
-            detail=ErrorResponse(error={"message": "The user with this email already exists in the system."}).dict()
+    if not current_user.is_admin:
+        raise UnauthorizedException(
+            message="You are not authorized to create a user",
         )
     db_user = await user_service.create_user(db, obj_in=user_in)
     return SuccessResponse(data=db_user, message="User created successfully")
+
 
 @router.get("/", response_model=SuccessResponse[List[UserSchema]])
 def read_users(
     db: Session = Depends(get_db),
     skip: int = 0,
     limit: int = 100,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_active_user),
 ):
     """
-    Retrieve users.
+    Retrieve users. Only accessible to admins.
     """
+    if not current_user.is_admin:
+        raise UnauthorizedException(
+            message="You are not authorized to get users",
+        )
     users = user_service.get_users(db, skip=skip, limit=limit)
     return SuccessResponse(data=users)
 
-@router.get("/me", response_model=SuccessResponse[UserSchema])
-def read_user_me(
-    current_user: User = Depends(get_current_user),
-):
-    """
-    Get current user.
-    """
-    return SuccessResponse(data=current_user)
 
 @router.get("/{user_id}", response_model=SuccessResponse[UserSchema])
-def read_user_by_id(
+def read_user(
     user_id: int,
-    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
 ):
     """
-    Get a specific user by id.
+    Get a specific user by ID. A user can get their own data, admins can get any user.
     """
     user = user_service.get_user(db, user_id=user_id)
-    if user == current_user:
-        return SuccessResponse(data=user)
-    if not current_user.is_superuser:
-        raise HTTPException(
-            status_code=400,
-            detail=ErrorResponse(error={"message": "The user doesn't have enough privileges"}).dict()
+    if not user:
+        raise NotFoundException("User not found")
+    if user.id != current_user.id and not current_user.is_admin:
+        raise UnauthorizedException(
+            message="You are not authorized to get a user",
         )
     return SuccessResponse(data=user)
+
 
 @router.put("/{user_id}", response_model=SuccessResponse[UserSchema])
 def update_user(
@@ -77,33 +74,43 @@ def update_user(
     db: Session = Depends(get_db),
     user_id: int,
     user_in: UserUpdate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_active_user),
 ):
     """
-    Update a user.
+    Update a user. A user can update their own data, admins can update any user.
     """
     user = user_service.get_user(db, user_id=user_id)
     if not user:
         raise NotFoundException("User not found")
-    db_user = user_service.update_user(db, db_obj=user, obj_in=user_in)
-    return SuccessResponse(data=db_user, message="User updated successfully")
+    if user.id != current_user.id and not current_user.is_admin:
+        raise UnauthorizedException(
+            message="You are not authorized to update a user",
+        )
+    updated_user = user_service.update_user(db, db_obj=user, obj_in=user_in)
+    return SuccessResponse(data=updated_user, message="User updated successfully")
+
 
 @router.delete("/{user_id}", response_model=SuccessResponse)
-def delete_user(user_id: int, db: Session = Depends(get_db)):
+def delete_user(
+    user_id: int, 
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Delete a user. Only accessible to admins.
+    """
+    if not current_user.is_admin:
+        raise UnauthorizedException(
+            message="You are not authorized to delete a user"
+        )
+    user_to_delete = user_service.get_user(db, user_id=user_id)
+    if not user_to_delete:
+        raise NotFoundException("User not found")
+    if user_to_delete.id == current_user.id:
+        raise BadRequestException(
+            message="Admins cannot delete themselves"
+        )
     success = user_service.delete_user(db, user_id=user_id)
     if not success:
         raise NotFoundException("User not found")
-    return SuccessResponse(message="User deleted successfully")
-
-@router.put("/me", response_model=SuccessResponse[UserSchema])
-def update_user_me(
-    *,
-    db: Session = Depends(get_db),
-    user_in: UserUpdate,
-    current_user: User = Depends(get_current_user),
-):
-    """
-    Update own user.
-    """
-    user = user_service.update_user(db, db_obj=current_user, obj_in=user_in)
-    return SuccessResponse(data=user, message="User updated successfully") 
+    return SuccessResponse(message="User deleted successfully") 

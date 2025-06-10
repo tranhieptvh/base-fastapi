@@ -1,5 +1,6 @@
 from sqlalchemy import Boolean, Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
+from sqlalchemy.ext.hybrid import hybrid_property
 from datetime import datetime, timezone
 
 from src.db.base import Base
@@ -16,6 +17,10 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+
+    @hybrid_property
+    def is_admin(self):
+        return self.role_id == 1
 
     # Relationships
     role = relationship("Role", back_populates="users")
