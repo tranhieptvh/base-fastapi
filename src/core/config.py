@@ -1,6 +1,6 @@
 from typing import List, Optional
 from pydantic_settings import BaseSettings
-from pydantic import AnyHttpUrl, ConfigDict
+from pydantic import AnyHttpUrl, ConfigDict, model_validator
 
 class Settings(BaseSettings):
     # API
@@ -13,22 +13,21 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     
-    # Database
-    DATABASE_URL: str = "sqlite:///./sql_app.db"
-    
     # CORS
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = ["http://localhost:3000"]
     
     # Frontend URL for email templates
     FRONTEND_URL: str = "http://localhost:3000"
 
-    # Database
+    # Database connection details
     MYSQL_ROOT_PASSWORD: str
     MYSQL_DATABASE: str
     MYSQL_USER: str
     MYSQL_PASSWORD: str
     MYSQL_HOST: str
     MYSQL_PORT: int
+    # This will be assembled by the validator below
+    DATABASE_URL: Optional[str] = None
 
     # Email settings
     MAIL_USERNAME: str
@@ -45,9 +44,14 @@ class Settings(BaseSettings):
     CELERY_MAX_TASKS_PER_CHILD: int = 1000
     CELERY_MAX_MEMORY_PER_CHILD: int = 200000
 
-    @property
-    def SQLALCHEMY_DATABASE_URL(self) -> str:
-        return self.DATABASE_URL
+    @model_validator(mode='after')
+    def assemble_db_connection(self) -> 'Settings':
+        if self.DATABASE_URL is None:
+            self.DATABASE_URL = (
+                f"mysql+pymysql://{self.MYSQL_USER}:{self.MYSQL_PASSWORD}@"
+                f"{self.MYSQL_HOST}:{self.MYSQL_PORT}/{self.MYSQL_DATABASE}"
+            )
+        return self
 
     model_config = ConfigDict(case_sensitive=True, env_file=".env")
 
