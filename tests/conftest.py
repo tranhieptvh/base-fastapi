@@ -8,7 +8,9 @@ sys.path.insert(0, project_root)
 
 # Load test environment variables BEFORE importing any other modules
 from dotenv import load_dotenv
-load_dotenv('.env.test', override=True)  # Force override existing env vars
+# Only load .env.test if not in a CI environment (like GitHub Actions)
+if not os.getenv('CI'):
+    load_dotenv('.env.test', override=True)  # Force override existing env vars
 
 import pytest
 from sqlalchemy import create_engine, text
@@ -25,29 +27,27 @@ from src.db.models import User, Role
 from src.core.security import create_access_token, get_password_hash
 from src.core.enums import RoleEnum
 
-# Test database configuration - use test environment variables
-TEST_DB_NAME = settings.MYSQL_DATABASE
-TEST_DB_USER = settings.MYSQL_USER
-TEST_DB_PASSWORD = settings.MYSQL_PASSWORD
-TEST_DB_HOST = settings.MYSQL_HOST
-TEST_DB_PORT = settings.MYSQL_PORT
-
-# Test database URL
-TEST_DATABASE_URL = f"mysql+pymysql://{TEST_DB_USER}:{TEST_DB_PASSWORD}@{TEST_DB_HOST}:{TEST_DB_PORT}/{TEST_DB_NAME}"
+# The single source of truth for the database URL
+TEST_DATABASE_URL = settings.DATABASE_URL
 
 @pytest.fixture(scope="session")
 def engine():
-    # Create test database if not exists
-    base_url = f"mysql+pymysql://{TEST_DB_USER}:{TEST_DB_PASSWORD}@{TEST_DB_HOST}:{TEST_DB_PORT}"
-    engine = create_engine(base_url, poolclass=StaticPool)
-    with engine.connect() as conn:
-        # Create test database if not exists
-        conn.execute(text(f"CREATE DATABASE IF NOT EXISTS {TEST_DB_NAME}"))
-        conn.execute(text(f"USE {TEST_DB_NAME}"))
+    # Use the unified DATABASE_URL from settings
+    test_engine = create_engine(TEST_DATABASE_URL, poolclass=StaticPool)
+
+    # Create test database if not exists - MORE ROBUST WAY
+    db_name = test_engine.url.database
+    # Manually construct the base URL without the database name
+    base_url = (
+        f"{test_engine.url.drivername}://{test_engine.url.username}:{test_engine.url.password}"
+        f"@{test_engine.url.host}:{test_engine.url.port}"
+    )
+
+    with create_engine(base_url).connect() as conn:
+        conn.execute(text(f"CREATE DATABASE IF NOT EXISTS {db_name}"))
         conn.commit()
     
-    # Create tables in test database
-    test_engine = create_engine(TEST_DATABASE_URL)
+    # Connect to the specific test database to create tables
     Base.metadata.create_all(bind=test_engine)
     return test_engine
 
@@ -71,8 +71,9 @@ def cleanup_test_db(engine):
     """Cleanup test database after all tests."""
     yield
     # Only drop test database, not the main database
+    db_name = engine.url.database
     with engine.connect() as conn:
-        conn.execute(text(f"DROP DATABASE IF EXISTS {TEST_DB_NAME}"))
+        conn.execute(text(f"DROP DATABASE IF EXISTS {db_name}"))
         conn.commit()
 
 @pytest.fixture(scope="function")
