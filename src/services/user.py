@@ -66,7 +66,7 @@ async def create_user(db: Session, obj_in: UserCreate) -> User:
 def update_user(
     db: Session, *, db_obj: User, obj_in: UserUpdate
 ) -> User:
-    update_data = obj_in.dict(exclude_unset=True)
+    update_data = obj_in.model_dump(exclude_unset=True)
     if "password" in update_data:
         update_data["password"] = get_password_hash(update_data["password"])
     for field, value in update_data.items():
