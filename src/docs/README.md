@@ -40,7 +40,6 @@ This is a modern FastAPI project template that provides a solid foundation for b
 │   │   ├── base.py       # SQLAlchemy base
 │   │   ├── session.py    # Database session management
 │   │   ├── init_db.py    # Database initialization
-│   │   ├── init_test_db.py # Test database initialization
 │   │   ├── models/       # Database models
 │   │   │   ├── user.py   # User model
 │   │   │   └── role.py   # Role model
@@ -275,15 +274,7 @@ make clean
    ```
 
 8. **Test database management**
-   ```bash
-   # Create test database
-   make exec
-   python -m src.db.init_test_db
-
-   # Reset test database
-   make exec
-   python -m src.db.reset_test_db
-   ```
+   The test database is now automatically created and destroyed by the `pytest` test suite. There are no manual scripts needed. Please see the [Testing Documentation](architecture/devops/testing.md) for more details.
 
 9. **Database connection**
    ```bash
