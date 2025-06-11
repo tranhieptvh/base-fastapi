@@ -90,86 +90,147 @@ def client(db_session):
         yield test_client
     app.dependency_overrides.clear()
 
+# region Roles & Users Fixtures
+
+# --- Admin Fixtures ---
+
 @pytest.fixture(scope="session")
-def test_role(engine):
-    """Create test role if not exists"""
+def admin_role(engine):
+    """Create admin role if not exists"""
     Session = sessionmaker(bind=engine)
     session = Session()
     try:
-        # Check if role exists
-        role = session.query(Role).filter(Role.name == "user").first()
+        role = session.query(Role).filter(Role.id == RoleEnum.ADMIN.value).first()
         if not role:
-            role = Role(
-                id=RoleEnum.USER.value,  # Use USER enum value (2)
-                name="user",
-            )
+            role = Role(id=RoleEnum.ADMIN.value, name="admin")
             session.add(role)
-            session.commit()  # Commit role creation
+            session.commit()
             session.refresh(role)
-        print(f"Test role created/found: {role.id} - {role.name}")
         return role
     finally:
         session.close()
 
 @pytest.fixture(scope="session")
-def test_user(engine, test_role):
-    """Create test user"""
+def admin_user(engine, admin_role):
+    """Create test admin user"""
     Session = sessionmaker(bind=engine)
     session = Session()
     try:
-        user = User(
-            email="test@example.com",
-            username="testuser",
-            full_name="Test User",
-            password=get_password_hash("password"),
-            role_id=test_role.id,
-            is_active=True
-        )
-        session.add(user)
-        session.commit()
-        session.refresh(user)
+        user = session.query(User).filter(User.email == "admin@example.com").first()
+        if not user:
+            user = User(
+                email="admin@example.com",
+                username="testadmin",
+                full_name="Test Admin",
+                password=get_password_hash("adminpassword"),
+                role_id=admin_role.id,
+                is_active=True,
+            )
+            session.add(user)
+            session.commit()
+            session.refresh(user)
+        return user
+    finally:
+        session.close()
+
+# --- Normal User Fixtures ---
+
+@pytest.fixture(scope="session")
+def normal_user_role(engine):
+    """Create test 'user' role if not exists"""
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    try:
+        role = session.query(Role).filter(Role.id == RoleEnum.USER.value).first()
+        if not role:
+            role = Role(id=RoleEnum.USER.value, name="user")
+            session.add(role)
+            session.commit()
+            session.refresh(role)
+        return role
+    finally:
+        session.close()
+
+@pytest.fixture(scope="session")
+def normal_user(engine, normal_user_role):
+    """Create a standard test user."""
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    try:
+        user = session.query(User).filter(User.email == "test@example.com").first()
+        if not user:
+            user = User(
+                email="test@example.com",
+                username="testuser",
+                full_name="Test User",
+                password=get_password_hash("password"),
+                role_id=normal_user_role.id,
+                is_active=True,
+            )
+            session.add(user)
+            session.commit()
+            session.refresh(user)
         return user
     finally:
         session.close()
 
 @pytest.fixture(scope="session")
-def test_inactive_user(engine, test_role):
-    """Create inactive test user"""
+def normal_inactive_user(engine, normal_user_role):
+    """Create an inactive test user."""
     Session = sessionmaker(bind=engine)
     session = Session()
     try:
-        user = User(
-            email="inactive@example.com",
-            username="inactiveuser",
-            full_name="Inactive User",
-            password=get_password_hash("password"),
-            role_id=test_role.id,
-            is_active=False
-        )
-        session.add(user)
-        session.commit()
-        session.refresh(user)
+        user = session.query(User).filter(User.email == "inactive@example.com").first()
+        if not user:
+            user = User(
+                email="inactive@example.com",
+                username="inactiveuser",
+                full_name="Inactive User",
+                password=get_password_hash("password"),
+                role_id=normal_user_role.id,
+                is_active=False,
+            )
+            session.add(user)
+            session.commit()
+            session.refresh(user)
         return user
     finally:
         session.close()
 
+# endregion
+
+# region Authentication Fixtures
+
+# --- Admin Auth ---
+
 @pytest.fixture(scope="function")
-def test_user_token(test_user):
-    """Create access token for test user"""
-    return create_access_token(
-        data={"sub": str(test_user.id)},
-        expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+def admin_auth_header(admin_user):
+    """Create authentication headers for an admin user."""
+    token = create_access_token(
+        data={"sub": str(admin_user.id)},
+        expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
     )
+    return {"Authorization": f"Bearer {token}"}
+
+# --- Normal User Auth ---
 
 @pytest.fixture(scope="function")
-def auth_headers(test_user_token):
-    """Create authentication headers"""
-    return {"Authorization": f"Bearer {test_user_token}"}
+def normal_user_auth_header(normal_user):
+    """Create authentication headers for a normal user."""
+    token = create_access_token(
+        data={"sub": str(normal_user.id)},
+        expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
+    )
+    return {"Authorization": f"Bearer {token}"}
+
+# --- Other Auth States ---
 
 @pytest.fixture(scope="function")
-def expired_token(test_user):
-    """Create expired access token"""
-    return create_access_token(
-        data={"sub": str(test_user.id)},
-        expires_delta=timedelta(microseconds=1)
-    ) 
+def expired_normal_user_token_header(normal_user):
+    """Create expired authentication headers."""
+    token = create_access_token(
+        data={"sub": str(normal_user.id)}, expires_delta=timedelta(microseconds=1)
+    )
+    return {"Authorization": f"Bearer {token}"}
+
+# endregion 

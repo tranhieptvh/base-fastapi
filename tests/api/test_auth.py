@@ -1,22 +1,17 @@
-import pytest
 from sqlalchemy.orm import Session
-from datetime import datetime, timedelta
 
 from src.db.models import User
-from src.core.security import create_access_token, get_password_hash
-from src.schemas.user import UserCreate, User as UserSchema
-from src.services import user as user_service
 from src.core.config import settings
 
-def test_register_success(client, db_session: Session, test_role):
+def test_register_success(client, db_session: Session, normal_user_role):
     # Arrange
-    print(f"Test role in test: {test_role.id} - {test_role.name}")  # Debug print
+    print(f"Test role in test: {normal_user_role.id} - {normal_user_role.name}")  # Debug print
     input_data = {
         "email": "newuser@example.com",
         "username": "newuser",
         "full_name": "New User",
         "password": "Test123!@#",
-        "role_id": test_role.id
+        "role_id": normal_user_role.id
     }
     print(f"Input data: {input_data}")  # Debug print
     
@@ -47,14 +42,14 @@ def test_register_success(client, db_session: Session, test_role):
     assert db_user.is_active is True
     assert db_user.role_id == input_data["role_id"]
 
-def test_register_duplicate_email(client, db_session: Session, test_user):
+def test_register_duplicate_email(client, db_session: Session, normal_user):
     # Try to create user with existing email
     input_data = {
-        "email": test_user.email,
+        "email": normal_user.email,
         "username": "newuser",  # Different username to avoid multiple errors
         "password": "Test123!@#",
         "full_name": "New User",
-        "role_id": test_user.role_id
+        "role_id": normal_user.role_id
     }
     
     # Act
@@ -75,16 +70,16 @@ def test_register_duplicate_email(client, db_session: Session, test_user):
     
     # Verify no new user was created
     db_users = db_session.query(User).filter(User.email == input_data["email"]).all()
-    assert len(db_users) == 1  # Only the original test_user should exist
+    assert len(db_users) == 1  # Only the original normal_user should exist
     
-def test_register_user_duplicate_username(client, db_session: Session, test_user):
+def test_register_user_duplicate_username(client, db_session: Session, normal_user):
     # Arrange
     input_data = {
         "email": "new@example.com",
-        "username": test_user.username,
+        "username": normal_user.username,
         "full_name": "New User",
         "password": "newpassword123",
-        "role_id": test_user.role_id
+        "role_id": normal_user.role_id
     }
     
     # Act
@@ -105,16 +100,16 @@ def test_register_user_duplicate_username(client, db_session: Session, test_user
     
     # Verify no new user was created
     db_users = db_session.query(User).filter(User.username == input_data["username"]).all()
-    assert len(db_users) == 1  # Only the original test_user should exist
+    assert len(db_users) == 1  # Only the original normal_user should exist
     
-def test_register_user_invalid_email(client, test_role):
+def test_register_user_invalid_email(client, normal_user_role):
     # Arrange
     input_data = {
         "email": "invalid-email",
         "username": "newuser",
         "full_name": "New User",
         "password": "newpassword123",
-        "role_id": test_role.id
+        "role_id": normal_user_role.id
     }
     
     # Act
@@ -131,14 +126,14 @@ def test_register_user_invalid_email(client, test_role):
     assert email_error["field"] == "email"
     assert email_error["type"] == "value_error"
 
-def test_register_user_short_password(client, test_role):
+def test_register_user_short_password(client, normal_user_role):
     # Arrange
     input_data = {
         "email": "new@example.com",
         "username": "newuser",
         "full_name": "New User",
         "password": "short",
-        "role_id": test_role.id
+        "role_id": normal_user_role.id
     }
     
     # Act
@@ -155,10 +150,10 @@ def test_register_user_short_password(client, test_role):
     assert password_error["field"] == "password"
     assert password_error["type"] == "string_too_short"
 
-def test_login_success(client, test_user):
+def test_login_success(client, normal_user):
     # Login with test user
     login_data = {
-        "email": test_user.email,
+        "email": normal_user.email,
         "password": "password"
     }
     response = client.post(f"{settings.API_STR}/auth/login", json=login_data)
@@ -169,10 +164,10 @@ def test_login_success(client, test_user):
     assert "refresh_token" in data
     assert data["token_type"] == "bearer"
 
-def test_login_wrong_password(client, test_user):
+def test_login_wrong_password(client, normal_user):
     # Login with wrong password
     login_data = {
-        "email": test_user.email,
+        "email": normal_user.email,
         "password": "wrongpassword"
     }
     response = client.post(f"{settings.API_STR}/auth/login", json=login_data)
@@ -182,10 +177,10 @@ def test_login_wrong_password(client, test_user):
     assert data["message"] == "Incorrect email or password"
     assert data["errors"]["type"] == "unauthorized"
 
-def test_login_inactive_user(client, test_inactive_user):
+def test_login_inactive_user(client, normal_inactive_user):
     # Arrange
     login_data = {
-        "email": test_inactive_user.email,
+        "email": normal_inactive_user.email,
         "password": "password"
     }
     
@@ -199,10 +194,10 @@ def test_login_inactive_user(client, test_inactive_user):
     assert data["message"] == "Inactive user"
     assert data["errors"]["type"] == "unauthorized"
 
-def test_logout_success(client, test_user):
+def test_logout_success(client, normal_user):
     # Login with test user
     login_data = {
-        "email": test_user.email,
+        "email": normal_user.email,
         "password": "password"
     }
     login_response = client.post(f"{settings.API_STR}/auth/login", json=login_data)
