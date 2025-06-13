@@ -12,9 +12,10 @@ We use Git Flow to manage branches in the project.
 ### Supporting Branches
 
 - **feature/**: For developing new features.
+  - Before starting, create an issue on GitHub to track the feature.
   - Branches from: `develop`
   - Merges into: `develop`
-  - Naming convention: `feature/<feature-name>`
+  - Naming convention: `feature/<issue-id>-<feature-name>`
 - **release/**: For preparing a new release.
   - Branches from: `develop`
   - Merges into: `main` and `develop`
@@ -30,18 +31,19 @@ We use Git Flow to manage branches in the project.
 
 ### Basic Workflow
 
-1.  Start a new feature:
+1.  Create an issue on GitHub to describe the new feature.
+2.  Start a new feature branch (e.g., for issue #123):
     ```bash
     git checkout develop
     git pull
-    git checkout -b feature/new-feature
+    git checkout -b feature/123-new-feature
     ```
-2.  Finish the feature and merge it into `develop`:
+3.  Finish the feature and merge it into `develop`:
     ```bash
     git checkout develop
-    git merge --no-ff feature/new-feature
+    git merge --no-ff feature/123-new-feature
     git push
-    git branch -d feature/new-feature
+    git branch -d feature/123-new-feature
     ```
 
 ---
