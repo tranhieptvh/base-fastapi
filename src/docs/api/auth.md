@@ -59,6 +59,29 @@ The authentication system provides secure user management using JWT-based authen
   ```
 - **Response**: A success message upon successful logout.
 
+### Forgot Password
+- **Endpoint**: `POST /api/auth/forgot-password`
+- **Description**: Sends a password reset email to the user.
+- **Request Body**:
+  ```json
+  {
+    "email": "user@example.com"
+  }
+  ```
+- **Response**: A success message confirming the email has been sent.
+
+### Reset Password
+- **Endpoint**: `POST /api/auth/reset-password`
+- **Description**: Resets the user's password using a valid token.
+- **Request Body**:
+  ```json
+  {
+    "token": "your_reset_token",
+    "new_password": "new_strong_password"
+  }
+  ```
+- **Response**: A success message upon successful password reset.
+
 ## Security Features
 
 ### Password Security

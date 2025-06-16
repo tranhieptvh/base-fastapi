@@ -1,7 +1,9 @@
 from sqlalchemy.orm import Session
+from unittest.mock import patch
 
 from src.db.models import User
 from src.core.config import settings
+from src.services.user import create_password_reset_token
 
 def test_register_success(client, db_session: Session, normal_user_role):
     # Arrange
@@ -226,3 +228,52 @@ def test_logout_invalid_token(client):
     assert data["status"] == "error"
     assert data["message"] == "Invalid token"
     assert data["errors"]["type"] == "unauthorized"
+
+@patch("src.api.auth.user_service.request_password_reset")
+def test_forgot_password_success(mock_request_password_reset, client, normal_user):
+    # Arrange
+    mock_request_password_reset.return_value = True
+    forgot_password_data = {"email": normal_user.email}
+    
+    # Act
+    response = client.post(f"{settings.API_STR}/auth/forgot-password", json=forgot_password_data)
+    
+    # Assert
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "success"
+    assert data["message"] == "Password reset email sent"
+    mock_request_password_reset.assert_called_once()
+
+def test_reset_password_success(client, normal_user):
+    # Arrange
+    token = create_password_reset_token(email=normal_user.email)
+    new_password = "new_strong_password"
+    reset_data = {"token": token, "new_password": new_password}
+    
+    # Act
+    response = client.post(f"{settings.API_STR}/auth/reset-password", json=reset_data)
+    
+    # Assert
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "success"
+    assert data["message"] == "Password has been reset successfully"
+
+    # Verify new password
+    login_data = {"email": normal_user.email, "password": new_password}
+    login_response = client.post(f"{settings.API_STR}/auth/login", json=login_data)
+    assert login_response.status_code == 200
+
+def test_reset_password_invalid_token(client):
+    # Arrange
+    reset_data = {"token": "invalid-token", "new_password": "some_password"}
+    
+    # Act
+    response = client.post(f"{settings.API_STR}/auth/reset-password", json=reset_data)
+    
+    # Assert
+    assert response.status_code == 400
+    data = response.json()
+    assert data["status"] == "error"
+    assert data["message"] == "Invalid token or user does not exist"

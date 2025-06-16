@@ -10,6 +10,7 @@ from src.core.config import settings
 from src.core.enums import RoleEnum
 from src.services.email import send_welcome_email
 from src.core.exceptions import DuplicateEntryException, ValidationException
+from src.tasks.email_tasks import send_reset_password_email_task
 
 def get_user(db: Session, user_id: int) -> Optional[User]:
     return db.query(User).filter(User.id == user_id).first()
@@ -93,19 +94,40 @@ def authenticate_user(db: Session, email: str, password: str) -> Optional[User]:
         return None
     return user
 
-def update_password(
-    db: Session, *, user: User, current_password: str, new_password: str
-) -> bool:
+def change_password(db: Session, *, user: User, current_password: str, new_password: str) -> User:
     if not verify_password(current_password, user.password):
-        return False
+        return None
     user.password = get_password_hash(new_password)
     db.add(user)
     db.commit()
+    db.refresh(user)
+    return user
+
+async def request_password_reset(db: Session, email: str) -> bool:
+    user = get_user_by_email(db, email=email)
+    if user:
+        password_reset_token = create_password_reset_token(email=email)
+        send_reset_password_email_task.delay(
+            email_to=user.email, username=user.username, token=password_reset_token
+        )
     return True
+
+def reset_password(db: Session, token: str, new_password: str) -> Optional[User]:
+    email = verify_password_reset_token(token)
+    if not email:
+        return None
+    user = get_user_by_email(db, email=email)
+    if not user:
+        return None
+    user.password = get_password_hash(new_password)
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
 
 def create_password_reset_token(email: str) -> str:
     """Create a password reset token for the given email."""
-    delta = timedelta(hours=settings.EMAIL_RESET_TOKEN_EXPIRE_HOURS)
+    delta = timedelta(hours=settings.PASSWORD_RESET_TOKEN_EXPIRE_HOURS)
     now = datetime.now(timezone.utc)
     expires = now + delta
     exp = expires.timestamp()

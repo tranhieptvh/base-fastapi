@@ -79,6 +79,17 @@ class UserUpdate(BaseModel):
             db.close()
         return v
 
+class UserChangePassword(BaseModel):
+    old_password: str
+    new_password: str = Field(..., min_length=6)
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+class ResetPassword(BaseModel):
+    token: str
+    new_password: str = Field(..., min_length=6)
+
 class UserInDBBase(UserBase):
     id: int
     is_active: bool
