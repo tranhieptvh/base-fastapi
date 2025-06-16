@@ -76,11 +76,26 @@ This module provides basic CRUD API endpoints for user management. Access to the
   }
   ```
 
+### 6. Change Password
+- **URL**: `/api/users/change-password`
+- **Method**: `POST`
+- **Description**: Change the current user's password. Requires authentication.
+- **Request Body**:
+  ```json
+  {
+    "old_password": "current_password",
+    "new_password": "new_strong_password"
+  }
+  ```
+- **Response**: A success message with the updated user object.
+
 ## Error Responses
 
 ### 400 Bad Request
 - **Message**: "Admins cannot delete themselves"
 - **Trigger**: An admin attempts to delete their own account.
+- **Message**: "Incorrect password"
+- **Trigger**: The provided `old_password` does not match the current password.
 
 ### 401 Unauthorized
 - **Message**: "You are not authorized to..."

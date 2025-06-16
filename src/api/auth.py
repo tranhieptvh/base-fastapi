@@ -3,13 +3,15 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy.orm import Session
 
-from src.core.exceptions import AppException, UnauthorizedException
+from src.core.exceptions import AppException, UnauthorizedException, BadRequestException
 from src.db.session import get_db
 from src.core.config import settings
 from src.schemas.token import Token, TokenRefresh
 from src.schemas.user import (
     UserCreate,
     UserResponse,
+    ForgotPasswordRequest,
+    ResetPassword,
 )
 from src.schemas.auth import (
     LoginRequest,
@@ -117,3 +119,29 @@ async def logout(
         return success_response(message="Successfully logged out")
     except Exception as e:
         raise e
+
+@router.post("/forgot-password")
+async def forgot_password(
+    request: ForgotPasswordRequest,
+    db: Session = Depends(get_db)
+) -> Any:
+    """
+    Send password reset email
+    """
+    await user_service.request_password_reset(db, email=request.email)
+    return success_response(message="Password reset email sent")
+
+@router.post("/reset-password")
+async def reset_password(
+    request: ResetPassword,
+    db: Session = Depends(get_db)
+) -> Any:
+    """
+    Reset password with token
+    """
+    user = user_service.reset_password(
+        db, token=request.token, new_password=request.new_password
+    )
+    if not user:
+        raise BadRequestException(message="Invalid token or user does not exist")
+    return success_response(message="Password has been reset successfully")

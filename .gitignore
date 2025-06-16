@@ -56,3 +56,6 @@ poetry.lock
 # Celery
 celerybeat-schedule
 celerybeat-schedule.db
+
+# Cursor
+.cursor/

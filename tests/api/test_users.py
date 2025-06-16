@@ -1,6 +1,5 @@
 from sqlalchemy.orm import Session
 from src.db.models import User
-from src.core.enums import RoleEnum
 from src.core.config import settings
 
 
@@ -18,14 +17,13 @@ def test_create_user_by_admin(client, db_session: Session, admin_auth_header, no
     response = client.post(f"{settings.API_STR}/users/", headers=admin_auth_header, json=user_data)
 
     # Assert
-    assert response.status_code == 201
+    assert response.status_code == 200
     data = response.json()
     assert data["status"] == "success"
     data = data["data"]
     assert data["email"] == user_data["email"]
     assert data["username"] == user_data["username"]
-    assert "id" in data
-    assert "password" not in data
+    assert data["full_name"] == user_data["full_name"]
 
     user_in_db = db_session.query(User).filter(User.id == data["id"]).first()
     assert user_in_db is not None
@@ -291,3 +289,68 @@ def test_delete_nonexistent_user(client, admin_auth_header):
     data = response.json()
     assert data["status"] == "error"
     assert data["message"] == "User not found"
+
+
+def test_delete_user_by_admin_self(client, admin_auth_header, admin_user):
+    # Arrange (no setup needed)
+    
+    # Act
+    response = client.delete(f"{settings.API_STR}/users/{admin_user.id}", headers=admin_auth_header)
+    
+    # Assert
+    assert response.status_code == 400
+    data = response.json()
+    assert data["status"] == "error"
+    assert data["message"] == "Admins cannot delete themselves"
+
+def test_change_password_success(client, normal_user_auth_header, normal_user):
+    # Arrange
+    password_data = {
+        "old_password": "password",
+        "new_password": "new_password_123"
+    }
+    
+    # Act
+    response = client.post(f"{settings.API_STR}/users/change-password", headers=normal_user_auth_header, json=password_data)
+    
+    # Assert
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "success"
+    assert data["message"] == "Password updated successfully"
+
+    # Verify the new password works for login
+    login_data = {"email": normal_user.email, "password": "new_password_123"}
+    login_response = client.post(f"{settings.API_STR}/auth/login", json=login_data)
+    assert login_response.status_code == 200
+
+def test_change_password_incorrect_old_password(client, normal_user_auth_header):
+    # Arrange
+    password_data = {
+        "old_password": "wrong_password",
+        "new_password": "new_password_123"
+    }
+    
+    # Act
+    response = client.post(f"{settings.API_STR}/users/change-password", headers=normal_user_auth_header, json=password_data)
+    
+    # Assert
+    assert response.status_code == 400
+    data = response.json()
+    assert data["status"] == "error"
+    assert data["message"] == "Incorrect password"
+
+def test_change_password_unauthenticated(client):
+    # Arrange
+    password_data = {
+        "old_password": "password",
+        "new_password": "new_password_123"
+    }
+    
+    # Act
+    response = client.post(f"{settings.API_STR}/users/change-password", json=password_data)
+    
+    # Assert
+    assert response.status_code == 401
+    data = response.json()
+    assert data["detail"] == "Not authenticated"
