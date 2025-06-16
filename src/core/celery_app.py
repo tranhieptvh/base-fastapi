@@ -53,19 +53,19 @@ celery_app.conf.update(
     
     # Beat schedule for promotion emails (every 5 minutes for testing)
     beat_schedule={
-        "send-promotion-emails": {
-            "task": "src.tasks.promotion_tasks.send_promotion_emails",
-            "schedule": 60*60*24,  # 1 day in seconds
-            "options": {
-                "queue": "email_queue",
-                "retry": True,
-                "retry_policy": {
-                    "max_retries": 3,
-                    "interval_start": 0,
-                    "interval_step": 0.2,
-                    "interval_max": 0.5,
-                },
-            },
-        },
+        # "send-promotion-emails": {
+        #     "task": "src.tasks.promotion_tasks.send_promotion_emails",
+        #     "schedule": 60*60*24,  # 1 day in seconds
+        #     "options": {
+        #         "queue": "email_queue",
+        #         "retry": True,
+        #         "retry_policy": {
+        #             "max_retries": 3,
+        #             "interval_start": 0,
+        #             "interval_step": 0.2,
+        #             "interval_max": 0.5,
+        #         },
+        #     },
+        # },
     },
 ) 

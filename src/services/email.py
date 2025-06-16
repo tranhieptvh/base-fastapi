@@ -86,4 +86,25 @@ async def send_welcome_email(email_to: str, username: str) -> None:
         subject="Welcome to Our Platform!",
         template_name="welcome.html",
         template_data=template_data
+    )
+
+async def send_reset_password_email(email_to: str, username: str, token: str) -> None:
+    """
+    Send password reset email.
+    
+    Args:
+        email_to: User's email address
+        username: User's username
+        token: Password reset token
+    """
+    template_data = {
+        "username": username,
+        "reset_url": f"{settings.FRONTEND_URL}/reset-password?token={token}"
+    }
+    
+    await send_email(
+        email_to=email_to,
+        subject="Password Reset Request",
+        template_name="reset_password.html",
+        template_data=template_data
     ) 
