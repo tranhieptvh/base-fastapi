@@ -31,6 +31,16 @@ async def create_user(
     return success_response(data=db_user, message="User created successfully")
 
 
+@router.get("/me")
+def get_current_user_info(
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Get current user information.
+    """
+    return success_response(data=current_user, message="User information retrieved successfully")
+
+
 @router.get("/")
 def read_users(
     db: Session = Depends(get_db),

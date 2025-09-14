@@ -1,6 +1,6 @@
 from typing import List, Optional
 from pydantic_settings import BaseSettings
-from pydantic import AnyHttpUrl, ConfigDict, model_validator
+from pydantic import ConfigDict, model_validator
 
 class Settings(BaseSettings):
     # API
@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     PASSWORD_RESET_TOKEN_EXPIRE_HOURS: int = 1
     
     # CORS
-    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = ["http://localhost:3000"]
+    BACKEND_CORS_ORIGINS: List[str] = ["http://localhost:3000"]
     
     # Frontend URL for email templates
     FRONTEND_URL: str = "http://localhost:3000"
