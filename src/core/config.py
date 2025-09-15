@@ -45,6 +45,9 @@ class Settings(BaseSettings):
     CELERY_MAX_TASKS_PER_CHILD: int = 1000
     CELERY_MAX_MEMORY_PER_CHILD: int = 200000
 
+    # AI settings
+    GEMINI_API_KEY: str = ""
+
     @model_validator(mode='after')
     def assemble_db_connection(self) -> 'Settings':
         if self.DATABASE_URL is None:

@@ -24,4 +24,6 @@ class User(Base):
 
     # Relationships
     role = relationship("Role", back_populates="users")
-    refresh_tokens = relationship("RefreshToken", back_populates="user", cascade="all, delete-orphan") 
+    refresh_tokens = relationship("RefreshToken", back_populates="user", cascade="all, delete-orphan")
+    vocabularies = relationship("Vocabulary", back_populates="user", cascade="all, delete-orphan")
+    spaced_repetitions = relationship("SpacedRepetition", back_populates="user", cascade="all, delete-orphan") 
