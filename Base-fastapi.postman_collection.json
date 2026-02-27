@@ -1,0 +1,722 @@
+{
+	"info": {
+		"_postman_id": "55be2c6d-1b23-4b0c-bf50-b6b01fab52d5",
+		"name": "Base-fastapi",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "37807653"
+	},
+	"item": [
+		{
+			"name": "users",
+			"item": [
+				{
+					"name": "read-users",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/users",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "read-user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/users/4",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create-user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"hieptv.develop+3@gmail.com\",\n  \"username\": \"hieptv.dev 3\",\n  \"password\": \"123456\",\n  \"full_name\": \"HiepTV 3\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/users",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "change-password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"old_password\": \"12345678\",\n  \"new_password\": \"123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/users/change-password",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"change-password"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update-user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"full_name\": \"hieptv.develop\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/users/4",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete-user",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/users/4",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"4"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "auth",
+			"item": [
+				{
+					"name": "register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"hieptv.develop@gmail.com\",\n    \"username\": \"hieptv.develop\",\n    \"password\": \"123456\",\n    \"full_name\": \"Hiep develop\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/auth/register",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "refresh token",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Kiểm tra response có thành công không",
+									"if (pm.response.code === 200) {",
+									"    // Lấy access token từ response",
+									"    var jsonData = pm.response.json();",
+									"    // Lưu access token mới vào environment",
+									"    pm.environment.set(\"access_token\", jsonData.data.access_token);",
+									"    ",
+									"    // Log để kiểm tra",
+									"    console.log(\"Access token mới đã được lưu:\", jsonData.data.access_token);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh_token\": \"{{refresh_token}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/auth/refresh-token",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"refresh-token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Kiểm tra response có thành công không",
+									"if (pm.response && pm.response.code === 200) {",
+									"    // Lấy tokens từ response",
+									"    var jsonData = pm.response.json();",
+									"    // Lưu tokens vào environment variables",
+									"    pm.environment.set(\"access_token\", jsonData.data.access_token);",
+									"    pm.environment.set(\"refresh_token\", jsonData.data.refresh_token);",
+									"    ",
+									"    // Log để kiểm tra",
+									"    console.log(\"Tokens đã được lưu:\", {",
+									"        access_token: jsonData.data.access_token,",
+									"        refresh_token: jsonData.data.refresh_token",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"user123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/auth/login",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "logout",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Kiểm tra response có thành công không",
+									"if (pm.response && pm.response.code === 200) {",
+									"    // Xóa tokens từ environment variables",
+									"    pm.environment.unset(\"access_token\");",
+									"    pm.environment.unset(\"refresh_token\");",
+									"    ",
+									"    // Log để kiểm tra",
+									"    console.log(\"Tokens đã được \");",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh_token\": \"{{refresh_token}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/auth/logout",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "forgot-password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"hieptv.develop@gmail.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/auth/forgot-password",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"forgot-password"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "reset-password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTAwNTk2NzEuNDA0MTU2LCJuYmYiOjE3NTAwNTYwNzEsInN1YiI6ImhpZXB0di5kZXZlbG9wQGdtYWlsLmNvbSJ9.ksuAoSLa-SxTft1G_TP-gtDyCopspOYnuSxSioqhLX8\",\n    \"new_password\": \"12345678\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/auth/reset-password",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"reset-password"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "vocab",
+			"item": [
+				{
+					"name": "analyze-word",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"word_phrase\": \"baby\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/vocabulary/analyze-word",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"vocabulary",
+								"analyze-word"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "ping",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/ping",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"ping"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					"// Kiểm tra nếu request hiện tại không phải là login",
+					"if (!pm.request.url.toString().includes('/auth/login')) {",
+					"    // Kiểm tra nếu có refresh_token",
+					"    if (pm.environment.get('refresh_token')) {",
+					"        // Lấy access_token hiện tại",
+					"        const currentAccessToken = pm.environment.get('access_token');",
+					"        ",
+					"        // Giải mã JWT token để kiểm tra thời gian hết hạn",
+					"        try {",
+					"            const tokenParts = currentAccessToken.split('.');",
+					"            const payload = JSON.parse(atob(tokenParts[1]));",
+					"            const expirationTime = payload.exp * 1000; // Chuyển sang milliseconds",
+					"            const currentTime = new Date().getTime();",
+					"            ",
+					"            // Chỉ refresh token nếu còn 5 phút nữa là hết hạn",
+					"            if (expirationTime - currentTime < 5 * 60 * 1000) {",
+					"                // Gọi API refresh",
+					"                pm.sendRequest({",
+					"                    url: pm.environment.get('url') + '/auth/refresh-token',",
+					"                    method: 'POST',",
+					"                    header: {",
+					"                        'Content-Type': 'application/json'",
+					"                    },",
+					"                    body: {",
+					"                        mode: 'raw',",
+					"                        raw: JSON.stringify({",
+					"                            refresh_token: pm.environment.get('refresh_token')",
+					"                        })",
+					"                    }",
+					"                }, function (err, res) {",
+					"                    if (err) {",
+					"                        console.error(err);",
+					"                    } else {",
+					"                        // Lưu access_token mới",
+					"                        var jsonData = res.json();",
+					"                        pm.environment.set('access_token', jsonData.data.access_token);",
+					"                        // Cập nhật refresh_token mới nếu có",
+					"                        if (jsonData.refresh_token) {",
+					"                            pm.environment.set('refresh_token', jsonData.data.refresh_token);",
+					"                        }",
+					"                    }",
+					"                });",
+					"            }",
+					"        } catch (error) {",
+					"            console.error('Error decoding token:', error);",
+					"        }",
+					"    }",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
